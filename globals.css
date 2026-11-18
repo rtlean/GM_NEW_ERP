@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* Tokens de docs/04-UI-UX.md */
+@theme {
+  --color-navy: #002356;
+  --color-gold: #d4a853;
+  --color-bg: #f5f7fb;
+  --color-line: #e8ecf3;
+  --color-muted: #4f5b72;
+  --color-warn: #fbf3d9;
+  --font-sans: 'Figtree Variable', system-ui, sans-serif;
+}
+
+a:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
