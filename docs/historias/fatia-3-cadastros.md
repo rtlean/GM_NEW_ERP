@@ -76,3 +76,14 @@ Tamanho: P · Depende de: US-3.5
 - Status "Com imóvel" / "Sem imóvel" é calculado pelos imóveis cadastrados (não existe campo de status no banco).
 - Leitura de imóveis fica em `src/lib/imoveis.ts` (só leitura, até a US-3.4).
 - Botão "Novo locador" entra junto com a US-3.2.
+
+## Notas de implementação (US-3.2, branch feat/us-3.2)
+- Telas `/locadores/novo` e `/locadores/[id]/editar`, com botões "Novo locador" e "Editar" (no formato do design).
+- CPF e CNPJ são validados pelos dígitos verificadores; CNPJ alfanumérico é aceito (`src/lib/documentos.ts`).
+- Duplicidade: se o CPF/CNPJ já existe em outro locador, aparece "Já existe: <nome>" com link.
+- WhatsApp é salvo como `5527999998888`; é só cadastro, sem envio.
+- Taxa de administração: padrão 10% para locador novo, de 0 a 100, guardada em centésimos (1000).
+- Repasse: Pix (tipo e chave) ou conta bancária (banco, agência, conta, tipo de conta), usando os mesmos valores já existentes no banco.
+- Cidade não foi incluída: a tabela `owners` não tem essa coluna. Precisa de migração aditiva, com aprovação do dono.
+- Os 22 locadores existentes continuam com taxa 0%. Só locadores novos entram com 10%.
+- Não há exclusão de locador; nada é apagado.
