@@ -21,7 +21,7 @@ export const MENU: GrupoMenu[] = [
 export const TODAS_AS_ROTAS = MENU.flatMap((g) => g.itens);
 
 /** Grupo do menu a que pertence um caminho como "/locadores/12". */
-export function grupoDoCaminho(caminho: string): GrupoMenu | undefined {
+export function grupoDoCaminho(caminho: string, menu: GrupoMenu[] = MENU): GrupoMenu | undefined {
   const rota = caminho.split("/")[1] ?? "";
-  return MENU.find((g) => g.itens.some((i) => i.rota === rota));
+  return menu.find((g) => g.itens.some((i) => i.rota === rota));
 }

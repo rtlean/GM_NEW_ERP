@@ -3,12 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MENU, grupoDoCaminho } from "@/lib/menu";
+import { type GrupoMenu, grupoDoCaminho } from "@/lib/menu";
 import { sair } from "@/lib/autenticacao";
 
-export default function TopNav() {
+export default function TopNav({ menu }: { menu: GrupoMenu[] }) {
   const caminho = usePathname();
-  const grupo = grupoDoCaminho(caminho);
+  const grupo = grupoDoCaminho(caminho, menu);
 
   // Tela de login não mostra o menu.
   if (caminho === "/login") return null;
@@ -20,7 +20,7 @@ export default function TopNav() {
           <Image src="/logo.png" alt="Soluções Imobiliárias, ir para o Dashboard" width={150} height={43} priority className="h-auto w-[110px] sm:w-[150px]" />
         </Link>
         <nav aria-label="Principal" className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
-          {MENU.map((g) => {
+          {menu.map((g) => {
             const ativo = g === grupo;
             return (
               <Link

@@ -26,7 +26,7 @@
 ### Escopo
 **Dentro (v1, acordado com o dono em 14/11/2026):** login e perfis; locadores, locatários, imóveis, contratos (PDF, alteração de aluguel, encerramento); cobranças do mês com registro manual de pagamento; lançamentos; cálculo da taxa; relatório mensal em PDF (download); dashboard; migração dos dados.
 
-**Fora da v1:** integração bancária (Sicredi, boleto, Pix), NFS-e, WhatsApp (API e envio), e-mail automático, consórcio, financiamento, pipeline, seguros, garantias, DIMOB, financeiro, repasses automáticos.
+**Fora da v1:** Pix, NFS-e, e-mail automático, consórcio, financiamento, pipeline, conta digital, seguros, garantias, DIMOB, financeiro, repasses automáticos. Sicredi e WhatsApp entram na v1 (decisão do dono, 19/11/2026).
 
 ### Requisitos funcionais (MVP)
 | ID | Requisito |
@@ -69,7 +69,7 @@ Metas de redução são propostas, não dados medidos: validar a linha de base n
 - Equipe de construção: 1 pessoa não técnica usando Claude Code (vibe coding).
 - Stack definida: Next.js + TypeScript + Tailwind, Supabase (banco existente e login), GitHub (rtlean/GM_NEW_ERP), VPS da Integrator com domínio.
 - Orçamento enxuto: preferir planos gratuitos/básicos.
-- Sem integrações externas na v1 (banco, NFS-e, WhatsApp ficam para versões futuras).
+- Integrações externas na v1: Sicredi e WhatsApp. NFS-e fica para versão futura.
 - NFS-e nacional obrigatória para ME do Simples (confirmar regras vigentes com o contador).
 - Regra de aluguel: mês inteiro, sem proporcional nem retroativo.
 
