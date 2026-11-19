@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { criarClienteSessao } from "@/lib/supabase/sessao";
 import { perfilAtual } from "@/lib/acesso";
-import { podeEntrar, primeiraRotaPermitida } from "@/lib/permissoes";
+import { podeEntrar, precisaTrocarSenha, primeiraRotaPermitida } from "@/lib/permissoes";
 
 /** Entra com e-mail e senha. Qualquer erro mostra a mesma mensagem (não revela se o e-mail existe). */
 export async function entrar(formData: FormData) {
@@ -25,6 +25,7 @@ export async function entrar(formData: FormData) {
     await supabase.auth.signOut();
     redirect("/login?erro=bloqueado");
   }
+  if (precisaTrocarSenha(perfil)) redirect("/trocar-senha");
   const primeira = primeiraRotaPermitida(perfil);
   if (!primeira) {
     await supabase.auth.signOut();
