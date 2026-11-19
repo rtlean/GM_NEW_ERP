@@ -34,6 +34,7 @@ export default function TopNav({ menu }: { menu: GrupoMenu[] }) {
             );
           })}
         </nav>
+        <Link href="/trocar-senha?voluntaria=1" className="flex min-h-11 items-center px-1.5 font-semibold text-navy">Minha senha</Link>
         <form action={sair}><button type="submit" className="flex min-h-11 items-center px-1.5 font-semibold text-navy">Sair</button></form>
       </div>
       {grupo && grupo.itens.length > 1 && (
