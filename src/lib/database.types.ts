@@ -1726,6 +1726,10 @@ export type Database = {
           created_at: string
           id: number
           occupancy_status: Database["public"]["Enums"]["occupancy_status"]
+          bairro: string | null
+          caracteristicas: string | null
+          complemento: string | null
+          numero: string | null
           owner_id: number | null
           rent_cents: number
           state: string
@@ -1741,6 +1745,10 @@ export type Database = {
           created_at?: string
           id?: number
           occupancy_status?: Database["public"]["Enums"]["occupancy_status"]
+          bairro?: string | null
+          caracteristicas?: string | null
+          complemento?: string | null
+          numero?: string | null
           owner_id?: number | null
           rent_cents?: number
           state: string
@@ -1756,6 +1764,10 @@ export type Database = {
           created_at?: string
           id?: number
           occupancy_status?: Database["public"]["Enums"]["occupancy_status"]
+          bairro?: string | null
+          caracteristicas?: string | null
+          complemento?: string | null
+          numero?: string | null
           owner_id?: number | null
           rent_cents?: number
           state?: string

@@ -48,3 +48,8 @@ Aluguel da competência M = `rent_cents` da última `contract_rent_changes` com 
 - `tenant_owners` (nova): vínculo locatário–locador. Preenchida com o `tenants.owner_id` atual (88 vínculos). RLS ligada, sem políticas (acesso só pelo servidor).
 - `tenants.owner_id` e `tenants.cpf` continuam existindo, só não são mais a fonte do vínculo nem do documento.
 - Testada numa transação com ROLLBACK antes de aplicar.
+
+## Migração 2026-11-19 (US-3.4, properties_detalhes_endereco) — aditiva
+- `properties.numero`, `complemento`, `bairro`, `caracteristicas` (novas, texto, opcionais). Os 90 imóveis continuam os mesmos; as colunas ficam vazias até o cadastro preencher.
+- `properties.address` continua guardando o endereço (logradouro).
+- Testada numa transação com ROLLBACK antes de aplicar.
