@@ -33,6 +33,9 @@ export default async function PaginaLocadores({
           <h1 className="text-3xl font-extrabold text-navy">Locadores</h1>
           <p className="text-muted">{locadores.length} encontrado(s)</p>
         </div>
+        <Link href="/locadores/novo" className="rounded-md bg-navy px-4 py-2 font-semibold text-white">
+          Novo locador
+        </Link>
 
         <form method="get" className="flex flex-wrap items-center gap-3">
           <input
@@ -82,7 +85,12 @@ export default async function PaginaLocadores({
         {selecionado ? (
           <section aria-label="Detalhe do locador" className="flex min-w-[320px] flex-[2] flex-col gap-4 rounded-2xl border border-line bg-white p-6">
             <div>
-              <h2 className="text-2xl font-extrabold text-navy">{selecionado.nome}</h2>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <h2 className="text-2xl font-extrabold text-navy">{selecionado.nome}</h2>
+                <Link href={`/locadores/${selecionado.id}/editar`} className="rounded-md border border-line px-3 py-2 font-semibold text-navy">
+                  Editar
+                </Link>
+              </div>
               <p className="text-muted">
                 CPF/CNPJ {mascararDocumento(selecionado.documento)} · WhatsApp {formatarTelefone(selecionado.telefone)} · {selecionado.status}
               </p>
