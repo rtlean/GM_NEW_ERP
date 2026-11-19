@@ -20,7 +20,7 @@ export async function trocarSenhaAction(_estadoAnterior: { erro?: string } | und
   if (error) return { erro: "Não foi possível trocar a senha. Tente de novo." };
 
   const { data } = await supabase.auth.getUser();
-  if (data.user) await concluirTrocaDeSenha(data.user.id);
+  if (data.user?.email) await concluirTrocaDeSenha(data.user.email);
 
   redirect("/dashboard");
 }

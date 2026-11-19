@@ -7,7 +7,6 @@ const EMPRESA_ID = 1;
 
 export type UsuarioLinha = {
   id: number;
-  authId: string;
   nome: string;
   email: string;
   role: "admin" | "user";
@@ -67,7 +66,7 @@ export async function listarUsuarios(): Promise<UsuarioLinha[]> {
 
   const { data: usuarios, error: erroUsuarios } = await db
     .from("users")
-    .select("id, open_id, name, email, role, status, must_change_password")
+    .select("id, name, email, role, status, must_change_password")
     .in("id", ids)
     .order("name");
   if (erroUsuarios) throw erroUsuarios;
@@ -81,7 +80,6 @@ export async function listarUsuarios(): Promise<UsuarioLinha[]> {
 
   return (usuarios ?? []).map((u) => ({
     id: u.id,
-    authId: u.open_id,
     nome: u.name ?? "",
     email: u.email ?? "",
     role: u.role,
@@ -95,6 +93,16 @@ export async function listarUsuarios(): Promise<UsuarioLinha[]> {
 export async function buscarUsuario(id: number): Promise<UsuarioLinha | null> {
   const lista = await listarUsuarios();
   return lista.find((u) => u.id === id) ?? null;
+}
+
+/** Id da conta de login (Supabase Auth) pelo e-mail. Não usa users.open_id, que não é confiável em contas antigas. */
+async function idDaContaDeLogin(email: string): Promise<string> {
+  const db = obterClienteServidor();
+  const { data, error } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (error) throw error;
+  const conta = data.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+  if (!conta) throw new Error("Conta de login não encontrada para este e-mail.");
+  return conta.id;
 }
 
 /** Operações de escrita só valem para o operacional: o admin nunca é restringido, bloqueado ou redefinido aqui. */
@@ -162,7 +170,8 @@ export async function redefinirSenha(id: number, senhaProvisoria: string): Promi
   const usuario = await operacionalDaEmpresa(id);
   const db = obterClienteServidor();
 
-  const { error: erroSenha } = await db.auth.admin.updateUserById(usuario.authId, { password: senhaProvisoria });
+  const authId = await idDaContaDeLogin(usuario.email);
+  const { error: erroSenha } = await db.auth.admin.updateUserById(authId, { password: senhaProvisoria });
   if (erroSenha) throw new Error("Não foi possível redefinir a senha. Tente de novo.");
 
   const { error } = await db
@@ -197,7 +206,8 @@ export async function editarContato(id: number, nome: string, email: string): Pr
 
   const db = obterClienteServidor();
   if (emailNormalizado !== usuario.email) {
-    const { error: erroAuth } = await db.auth.admin.updateUserById(usuario.authId, { email: emailNormalizado });
+    const authId = await idDaContaDeLogin(usuario.email);
+    const { error: erroAuth } = await db.auth.admin.updateUserById(authId, { email: emailNormalizado });
     if (erroAuth) throw new Error("Não foi possível alterar o e-mail. Tente de novo.");
   }
   const { error } = await db
@@ -229,11 +239,11 @@ export async function salvarTelas(id: number, telas: string[]): Promise<void> {
 }
 
 /** Marca que o próprio usuário trocou a senha no primeiro acesso. */
-export async function concluirTrocaDeSenha(authId: string): Promise<void> {
+export async function concluirTrocaDeSenha(email: string): Promise<void> {
   const db = obterClienteServidor();
   const { error } = await db
     .from("users")
     .update({ must_change_password: false, updated_at: new Date().toISOString() })
-    .eq("open_id", authId);
+    .eq("email", email.trim().toLowerCase());
   if (error) throw error;
 }
