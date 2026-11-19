@@ -4,10 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MENU, grupoDoCaminho } from "@/lib/menu";
+import { sair } from "@/lib/autenticacao";
 
 export default function TopNav() {
   const caminho = usePathname();
   const grupo = grupoDoCaminho(caminho);
+
+  // Tela de login não mostra o menu.
+  if (caminho === "/login") return null;
 
   return (
     <header className="bg-white shadow-[0_1px_0_var(--line),0_6px_20px_rgba(0,35,86,.05)]">
@@ -30,7 +34,7 @@ export default function TopNav() {
             );
           })}
         </nav>
-        <Link href="/login" className="flex min-h-11 items-center px-1.5 font-semibold text-navy">Sair</Link>
+        <form action={sair}><button type="submit" className="flex min-h-11 items-center px-1.5 font-semibold text-navy">Sair</button></form>
       </div>
       {grupo && grupo.itens.length > 1 && (
         <nav aria-label={grupo.rotulo} className="border-t border-line">
