@@ -5,6 +5,7 @@ const base: EntradaLocador = {
   nome: "Maria Silva",
   documento: "529.982.247-25",
   email: "",
+  cidade: "Linhares",
   whatsapp: "(27) 99999-8888",
   taxa: "10",
   formaRepasse: "PIX",
@@ -49,6 +50,7 @@ describe("validarLocador", () => {
     if (r.ok) {
       expect(r.dados.document).toBe("52998224725");
       expect(r.dados.phone).toBe("5527999998888");
+      expect(r.dados.city).toBe("Linhares");
       expect(r.dados.admin_fee_percent_basis_points).toBe(1000);
       expect(r.dados.pix_type).toBe("CPF");
       expect(r.dados.pix_key).toBe("52998224725");

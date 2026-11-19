@@ -20,6 +20,7 @@ function lerEntrada(formData: FormData): EntradaLocador {
     nome: texto("nome"),
     documento: texto("documento"),
     email: texto("email"),
+    cidade: texto("cidade"),
     whatsapp: texto("whatsapp"),
     taxa: texto("taxa"),
     formaRepasse: texto("formaRepasse"),

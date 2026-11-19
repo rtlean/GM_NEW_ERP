@@ -53,6 +53,9 @@ export function FormularioLocador({ inicial, id }: Props) {
         <Campo rotulo="E-mail" nome="email" erro={erros.email}>
           <input type="email" name="email" defaultValue={inicial.email} autoComplete="off" className={entrada} />
         </Campo>
+        <Campo rotulo="Cidade" nome="cidade">
+          <input name="cidade" defaultValue={inicial.cidade} className={entrada} />
+        </Campo>
         <Campo rotulo="WhatsApp" nome="whatsapp" erro={erros.whatsapp}>
           <input name="whatsapp" defaultValue={inicial.whatsapp} placeholder="(27) 99999-8888" className={entrada} />
         </Campo>

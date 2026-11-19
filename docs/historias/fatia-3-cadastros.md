@@ -84,6 +84,11 @@ Tamanho: P · Depende de: US-3.5
 - WhatsApp é salvo como `5527999998888`; é só cadastro, sem envio.
 - Taxa de administração: padrão 10% para locador novo, de 0 a 100, guardada em centésimos (1000).
 - Repasse: Pix (tipo e chave) ou conta bancária (banco, agência, conta, tipo de conta), usando os mesmos valores já existentes no banco.
-- Cidade não foi incluída: a tabela `owners` não tem essa coluna. Precisa de migração aditiva, com aprovação do dono.
+- Cidade do locador incluída na migração `tenants_multi_owner` (coluna `owners.city`), aprovada pelo dono em 19/11/2026.
 - Os 22 locadores existentes continuam com taxa 0%. Só locadores novos entram com 10%.
 - Não há exclusão de locador; nada é apagado.
+
+## Notas da migração para US-3.3 (branch feat/us-3.3)
+- Locatário com CNPJ: 18 registros tinham 14 dígitos guardados na coluna `cpf` (são CNPJs). A nova coluna `document` trata os dois casos.
+- Decisão do dono (19/11/2026): um locatário pode ter imóveis de locadores diferentes, por isso o vínculo foi para `tenant_owners`.
+- Pendente: taxa de administração dos 22 locadores atuais (estão em 0%).
