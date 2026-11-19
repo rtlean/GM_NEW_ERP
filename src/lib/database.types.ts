@@ -2029,6 +2029,30 @@ export type Database = {
           },
         ]
       }
+      user_screen_permissions: {
+        Row: {
+          company_id: number
+          created_at: string
+          id: number
+          screen_key: string
+          user_id: number
+        }
+        Insert: {
+          company_id?: number
+          created_at?: string
+          id?: number
+          screen_key: string
+          user_id: number
+        }
+        Update: {
+          company_id?: number
+          created_at?: string
+          id?: number
+          screen_key?: string
+          user_id?: number
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           active_company_id: number | null

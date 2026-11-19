@@ -6,6 +6,12 @@ export default async function PaginaLogin({
   searchParams: Promise<{ erro?: string }>;
 }) {
   const { erro } = await searchParams;
+  const mensagens: Record<string, string> = {
+    "1": "E-mail ou senha incorretos",
+    bloqueado: "Acesso bloqueado. Fale com o administrador.",
+    "sem-telas": "Seu acesso ainda não tem telas liberadas. Fale com o administrador.",
+  };
+  const mensagem = erro ? (mensagens[erro] ?? mensagens["1"]) : null;
 
   return (
     <section className="mx-auto mt-16 max-w-sm rounded-lg border border-line bg-white p-8">
@@ -34,9 +40,9 @@ export default async function PaginaLogin({
           />
         </label>
 
-        {erro ? (
+        {mensagem ? (
           <p role="alert" className="rounded-md bg-warn px-3 py-2 text-navy">
-            E-mail ou senha incorretos
+            {mensagem}
           </p>
         ) : null}
 
