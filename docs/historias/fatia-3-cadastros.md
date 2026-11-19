@@ -92,3 +92,12 @@ Tamanho: P · Depende de: US-3.5
 - Locatário com CNPJ: 18 registros tinham 14 dígitos guardados na coluna `cpf` (são CNPJs). A nova coluna `document` trata os dois casos.
 - Decisão do dono (19/11/2026): um locatário pode ter imóveis de locadores diferentes, por isso o vínculo foi para `tenant_owners`.
 - Pendente: taxa de administração dos 22 locadores atuais (estão em 0%).
+
+## Notas de implementação (US-3.3, branch feat/us-3.3-locatarios)
+- Telas `/locatarios`, `/locatarios/novo` e `/locatarios/[id]/editar`, com busca por nome ou CPF/CNPJ.
+- Cadastro pede nome, CPF/CNPJ (com dígitos verificadores), e-mail, WhatsApp e pelo menos um locador ligado.
+- Mesmo CPF/CNPJ de outro locatário: aparece "Já existe: <nome>".
+- O vínculo com locadores fica em `tenant_owners` (migração da US-3.3). Um locatário pode ter imóveis de locadores diferentes.
+- Lista mostra os contratos ativos de cada locatário (leitura em `src/lib/contratos.ts`; a tela de contratos é a US-3.5).
+- Aluguel (`rent_cents`) e tipo de imóvel (`property_type`) dos locatários existentes não são editados nesta história.
+- Pendente: a tela só adiciona vínculos com locadores; remover um vínculo exige uma coluna de status (decisão futura, sem apagar registros).

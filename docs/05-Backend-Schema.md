@@ -15,7 +15,7 @@ O sistema antigo **continua em uso** sobre essas tabelas. Consequências:
 |---|---|---|---|
 | auth/usuarios | `users` + `company_users` | name, email, password_hash, role (`user`/`admin`), status (`active`/`inactive`), must_change_password | 5 / 3 |
 | locadores | `owners` | full_name, document, email, city, phone, admin_fee_percent_basis_points, dados bancários e Pix | 22 |
-| locatarios | `tenants` | full_name, cpf, document (CPF/CNPJ limpo, único por empresa), email, phone, owner_id (legado), rent_cents, property_type | 88 |
+| locatarios | `tenants` | full_name, cpf, document (CPF/CNPJ limpo, único por empresa), email, phone, owner_id (legado; o vínculo real está em tenant_owners), rent_cents e property_type (não editados pela tela) | 88 |
 | vínculo locatário–locador | `tenant_owners` | tenant_id, owner_id, company_id (único por trio); um locatário pode ter vários locadores | 88 |
 | imoveis | `properties` | code, type, address, city, state, zip_code, rent_cents, occupancy_status, owner_id | 90 |
 | contratos | `contracts` | property_id, tenant_id, start_date, end_date, rent_cents, status (`active`/`ended`/`draft`), admin_fee_percent_basis_points | 90 |
