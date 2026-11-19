@@ -75,3 +75,14 @@ export async function salvarLocador(dados: DadosLocador, id?: number): Promise<n
   if (error || !data) throw new Error("Não foi possível cadastrar o locador. Tente de novo.");
   return data.id;
 }
+
+/** Lista de locadores para escolher em um locatário (id e nome, em ordem de nome). */
+export async function listarOpcoesDeLocador(): Promise<{ id: number; nome: string }[]> {
+  const { data, error } = await obterClienteServidor()
+    .from("owners")
+    .select("id, full_name")
+    .eq("company_id", EMPRESA_ID)
+    .order("full_name", { ascending: true });
+  if (error) throw new Error("Não foi possível carregar os locadores.");
+  return (data ?? []).map((l) => ({ id: l.id, nome: l.full_name }));
+}
