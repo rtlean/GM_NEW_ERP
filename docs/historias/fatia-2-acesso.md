@@ -33,3 +33,12 @@ Tamanho: M · Depende de: US-2.2
 - Conta bloqueada (`status = inactive`) não entra e é desconectada. Tela sem permissão responde 404.
 - Login leva o usuário para a primeira tela liberada. Sem nenhuma tela liberada, mostra "Seu acesso ainda não tem telas liberadas".
 - Layout raiz é dinâmico (`force-dynamic`): o menu depende de quem está logado. Build não precisa das chaves do Supabase.
+
+## Notas de implementação (US-2.3, branch feat/us-2.3)
+- Tela `/usuarios` segue o design "Usuários e acessos": lista, dados, senha provisória (mostrada uma vez), bloquear/desbloquear e grade de telas por grupo.
+- Criar operacional: conta no Supabase Auth com senha provisória gerada no servidor, linha em `users` (`must_change_password = true`) e vínculo em `company_users`. Se o banco recusar, a conta do Auth é desfeita.
+- Redefinir senha e bloquear marcam `sessions_invalidated_at`: sessões emitidas antes deixam de valer (checado pelo `iat` do token em `perfilAtual`).
+- Troca de senha obrigatória em `/trocar-senha`: quem precisa trocar só enxerga essa tela.
+- Editar e-mail: o Supabase Auth manda confirmação para o novo endereço (padrão do serviço).
+- Telas liberáveis: as da v1 + Sicredi e WhatsApp (chaves de permissão; as telas em si são outras histórias).
+- Admin nunca é restringido, bloqueado ou redefinido pela tela (rejeitado no servidor, não só escondido).
