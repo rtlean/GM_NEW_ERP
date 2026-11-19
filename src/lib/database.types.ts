@@ -1606,6 +1606,7 @@ export type Database = {
           bank_name: string | null
           beneficiary_name: string | null
           company_id: number | null
+          city: string | null
           created_at: string
           document: string | null
           email: string | null
@@ -1629,6 +1630,7 @@ export type Database = {
           bank_name?: string | null
           beneficiary_name?: string | null
           company_id?: number | null
+          city?: string | null
           created_at?: string
           document?: string | null
           email?: string | null
@@ -1652,6 +1654,7 @@ export type Database = {
           bank_name?: string | null
           beneficiary_name?: string | null
           company_id?: number | null
+          city?: string | null
           created_at?: string
           document?: string | null
           email?: string | null
@@ -1970,12 +1973,37 @@ export type Database = {
           },
         ]
       }
+      tenant_owners: {
+        Row: {
+          company_id: number
+          created_at: string
+          id: number
+          owner_id: number
+          tenant_id: number
+        }
+        Insert: {
+          company_id?: number
+          created_at?: string
+          id?: number
+          owner_id: number
+          tenant_id: number
+        }
+        Update: {
+          company_id?: number
+          created_at?: string
+          id?: number
+          owner_id?: number
+          tenant_id?: number
+        }
+        Relationships: []
+      }
       tenants: {
         Row: {
           admin_fee_basis_points: number | null
           company_id: number | null
           cpf: string | null
           created_at: string
+          document: string | null
           email: string | null
           full_name: string
           id: number
@@ -1992,6 +2020,7 @@ export type Database = {
           company_id?: number | null
           cpf?: string | null
           created_at?: string
+          document?: string | null
           email?: string | null
           full_name: string
           id?: number
@@ -2008,6 +2037,7 @@ export type Database = {
           company_id?: number | null
           cpf?: string | null
           created_at?: string
+          document?: string | null
           email?: string | null
           full_name?: string
           id?: number

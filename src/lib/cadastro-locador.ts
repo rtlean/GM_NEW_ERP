@@ -14,6 +14,7 @@ export type EntradaLocador = {
   nome: string;
   documento: string;
   email: string;
+  cidade: string;
   whatsapp: string;
   taxa: string;
   formaRepasse: string;
@@ -31,6 +32,7 @@ export type DadosLocador = {
   full_name: string;
   document: string;
   email: string | null;
+  city: string | null;
   phone: string | null;
   admin_fee_percent_basis_points: number;
   preferred_repass_method: string | null;
@@ -84,6 +86,7 @@ export function paraFormulario(dados: Partial<DadosLocador> & { full_name?: stri
     nome: dados.full_name ?? "",
     documento: dados.document ?? "",
     email: dados.email ?? "",
+    cidade: dados.city ?? "",
     whatsapp,
     taxa: String(taxa / 100).replace(".", ","),
     formaRepasse: dados.preferred_repass_method ?? "PIX",
@@ -151,6 +154,7 @@ export function validarLocador(entrada: EntradaLocador): ResultadoLocador {
       full_name: nome,
       document: documento,
       email: email || null,
+      city: entrada.cidade.trim() || null,
       phone: whatsapp.valor,
       admin_fee_percent_basis_points: taxa.valor,
       preferred_repass_method: entrada.formaRepasse,
