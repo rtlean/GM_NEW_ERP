@@ -101,3 +101,11 @@ Tamanho: P · Depende de: US-3.5
 - Lista mostra os contratos ativos de cada locatário (leitura em `src/lib/contratos.ts`; a tela de contratos é a US-3.5).
 - Aluguel (`rent_cents`) e tipo de imóvel (`property_type`) dos locatários existentes não são editados nesta história.
 - Pendente: a tela só adiciona vínculos com locadores; remover um vínculo exige uma coluna de status (decisão futura, sem apagar registros).
+
+## Notas de implementação (US-3.4, branch feat/us-3.4-tela)
+- Telas `/imoveis`, `/imoveis/novo` e `/imoveis/[id]/editar`, com filtros por locador, tipo e busca por endereço, bairro ou código.
+- Formulário em 3 abas do design: Identificação, Características e Valores e vínculos.
+- Código do imóvel é gerado pelo sistema: próximo número da sequência (0091, 0092...).
+- Situação do cadastro: Disponível ou Em manutenção. "Alugado" vem do contrato (US-3.5). Na edição, um imóvel alugado continua alugado.
+- Características (texto livre) gravadas em `properties.caracteristicas`.
+- Diferenças em relação ao design, para decisão: lista de tipos do design (inclui Depósito, Terreno e Ponto comercial, sem Consultório); campos de matrícula, IPTU, valor de venda, condomínio e comodidades do design não estão nesta versão.
