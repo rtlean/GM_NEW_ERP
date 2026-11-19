@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 // Simula o ambiente do servidor: o pacote "server-only" só bloqueia navegador.
 vi.mock("server-only", () => ({}));
 
-import { formatarTelefone, mascararDocumento, montarFiltroBusca } from "./locadores";
+import { formatarTelefone, mascararDocumento, montarFiltroBusca, statusDoLocador, temWhatsApp } from "./locadores";
 
 describe("mascararDocumento", () => {
   it("mostra só os dois últimos dígitos do CPF", () => {
@@ -60,5 +60,20 @@ describe("montarFiltroBusca", () => {
 
   it("remove caracteres que quebrariam o filtro", () => {
     expect(montarFiltroBusca("Ana,(x)%")).toBe("full_name.ilike.%Anax%");
+  });
+});
+
+describe("statusDoLocador", () => {
+  it("mostra Com imóvel quando há pelo menos um imóvel", () => {
+    expect(statusDoLocador(1)).toBe("Com imóvel");
+    expect(statusDoLocador(0)).toBe("Sem imóvel");
+  });
+});
+
+describe("temWhatsApp", () => {
+  it("considera sem WhatsApp quando não há telefone", () => {
+    expect(temWhatsApp(null)).toBe(false);
+    expect(temWhatsApp("")).toBe(false);
+    expect(temWhatsApp("5527999998888")).toBe(true);
   });
 });

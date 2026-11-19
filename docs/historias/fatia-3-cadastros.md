@@ -70,3 +70,9 @@ Tamanho: M · Depende de: US-3.5
 - Contratos encerrados ficam em filtro próprio; nada é apagado.
 
 Tamanho: P · Depende de: US-3.5
+
+## Notas de implementação (US-3.1, branch feat/us-3.1)
+- Tela `/locadores` segue o design: busca, filtro "Sem WhatsApp", lista com imóveis e total de aluguel, detalhe com os imóveis do locador.
+- Status "Com imóvel" / "Sem imóvel" é calculado pelos imóveis cadastrados (não existe campo de status no banco).
+- Leitura de imóveis fica em `src/lib/imoveis.ts` (só leitura, até a US-3.4).
+- Botão "Novo locador" entra junto com a US-3.2.
