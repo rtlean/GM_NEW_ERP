@@ -1,5 +1,6 @@
 import "server-only";
 import { obterClienteServidor } from "./supabase/server";
+import { resumoImoveisPorLocador } from "./imoveis";
 
 // Regras e acesso a dados dos locadores (docs/historias/fatia-1-banco.md, US-1.2).
 // Só leitura. Toda consulta filtra company_id = 1.
@@ -11,7 +12,20 @@ export type LocadorLinha = {
   nome: string;
   documento: string | null;
   telefone: string | null;
+  quantidadeImoveis: number;
+  totalAluguelCentavos: number;
+  status: "Com imóvel" | "Sem imóvel";
 };
+
+/** Status mostrado no design: "Com imóvel" quando há pelo menos um imóvel cadastrado. */
+export function statusDoLocador(quantidadeImoveis: number): "Com imóvel" | "Sem imóvel" {
+  return quantidadeImoveis > 0 ? "Com imóvel" : "Sem imóvel";
+}
+
+/** Locador tem WhatsApp quando o telefone tem algum dígito. */
+export function temWhatsApp(telefone: string | null): boolean {
+  return !!telefone && /\d/.test(telefone);
+}
 
 /** Mostra só os dois últimos caracteres do CPF ou CNPJ. Ex.: ***.***.***-09 */
 export function mascararDocumento(documento: string | null): string {
@@ -53,24 +67,34 @@ export function montarFiltroBusca(busca: string): string | null {
   return condicoes.join(",");
 }
 
-/** Lista os locadores da empresa, em ordem de nome, com busca opcional. */
-export async function listarLocadores(busca = ""): Promise<LocadorLinha[]> {
+export type FiltrosLocadores = { busca?: string; semWhatsApp?: boolean };
+
+/** Lista os locadores da empresa, em ordem de nome, com busca e filtro "Sem WhatsApp". */
+export async function listarLocadores(filtros: FiltrosLocadores = {}): Promise<LocadorLinha[]> {
   let consulta = obterClienteServidor()
     .from("owners")
     .select("id, full_name, document, phone")
     .eq("company_id", EMPRESA_ID)
     .order("full_name", { ascending: true });
 
-  const filtro = montarFiltroBusca(busca);
+  const filtro = montarFiltroBusca(filtros.busca ?? "");
   if (filtro) consulta = consulta.or(filtro);
+  // Sem WhatsApp: telefone vazio ou nulo. Cada .or() é combinado com os demais (E).
+  if (filtros.semWhatsApp) consulta = consulta.or("phone.is.null,phone.eq.");
 
-  const { data, error } = await consulta;
+  const [{ data, error }, imoveis] = await Promise.all([consulta, resumoImoveisPorLocador()]);
   if (error) throw new Error(`Não foi possível carregar os locadores: ${error.message}`);
 
-  return (data ?? []).map((linha) => ({
-    id: linha.id,
-    nome: linha.full_name,
-    documento: linha.document,
-    telefone: linha.phone,
-  }));
+  return (data ?? []).map((linha) => {
+    const resumo = imoveis.get(linha.id) ?? { quantidade: 0, totalAluguelCentavos: 0 };
+    return {
+      id: linha.id,
+      nome: linha.full_name,
+      documento: linha.document,
+      telefone: linha.phone,
+      quantidadeImoveis: resumo.quantidade,
+      totalAluguelCentavos: resumo.totalAluguelCentavos,
+      status: statusDoLocador(resumo.quantidade),
+    };
+  });
 }
