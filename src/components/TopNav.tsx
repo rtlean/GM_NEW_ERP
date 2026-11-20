@@ -3,18 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type GrupoMenu, grupoDoCaminho } from "@/lib/menu";
+import { type GrupoMenu, type ItemMenu, grupoDoCaminho } from "@/lib/menu";
 import { sair } from "@/lib/autenticacao";
 
-export default function TopNav({ menu }: { menu: GrupoMenu[] }) {
+// Barra superior do layout do design. Módulos que ainda não existem aparecem como "Em construção".
+export default function TopNav({ menu, atalhos }: { menu: GrupoMenu[]; atalhos: ItemMenu[] }) {
   const caminho = usePathname();
-  const grupo = grupoDoCaminho(caminho, menu);
 
   // Tela de login não mostra o menu.
   if (caminho === "/login") return null;
 
+  const grupo = grupoDoCaminho(caminho, menu);
+  const noAtalho = (rota: string) => caminho === `/${rota}` || caminho.startsWith(`/${rota}/`);
+
   return (
-    <header className="bg-white shadow-[0_1px_0_var(--line),0_6px_20px_rgba(0,35,86,.05)]">
+    <header className="bg-white shadow-[0_1px_0_var(--color-line),0_6px_20px_rgba(0,35,86,.05)]">
       <div className="mx-auto flex max-w-[1320px] items-center gap-5 px-4 py-2.5 sm:px-7">
         <Link href="/dashboard" className="shrink-0">
           <Image src="/logo.png" alt="Soluções Imobiliárias, ir para o Dashboard" width={150} height={43} priority className="h-auto w-[110px] sm:w-[150px]" />
@@ -27,27 +30,50 @@ export default function TopNav({ menu }: { menu: GrupoMenu[] }) {
                 key={g.rotulo}
                 href={`/${g.itens[0].rota}`}
                 aria-current={ativo ? "page" : undefined}
-                className={`flex min-h-11 shrink-0 items-center rounded-full px-3.5 ${ativo ? "bg-navy font-bold text-white" : "font-medium text-navy"}`}
+                title={g.emConstrucao ? "Em construção" : undefined}
+                className={`flex min-h-11 shrink-0 items-center rounded-full px-3.5 ${
+                  ativo ? "bg-navy font-bold text-white" : g.emConstrucao ? "font-medium text-muted" : "font-medium text-navy"
+                }`}
               >
                 {g.rotulo}
               </Link>
             );
           })}
         </nav>
-        <Link href="/trocar-senha?voluntaria=1" className="flex min-h-11 items-center px-1.5 font-semibold text-navy">Minha senha</Link>
-        <form action={sair}><button type="submit" className="flex min-h-11 items-center px-1.5 font-semibold text-navy">Sair</button></form>
+        {atalhos.map((a) => {
+          const ativo = noAtalho(a.rota);
+          return (
+            <Link
+              key={a.rota}
+              href={`/${a.rota}`}
+              aria-current={ativo ? "page" : undefined}
+              title={a.emConstrucao ? "Em construção" : undefined}
+              className={`flex min-h-11 shrink-0 items-center rounded-full border px-4 font-semibold ${ativo ? "border-navy text-navy" : "border-[#D8DEE9] text-muted"}`}
+            >
+              {a.rotulo}
+            </Link>
+          );
+        })}
+        <form action={sair}>
+          <button type="submit" className="flex min-h-11 items-center px-1.5 font-semibold text-navy">
+            Sair
+          </button>
+        </form>
       </div>
       {grupo && grupo.itens.length > 1 && (
         <nav aria-label={grupo.rotulo} className="border-t border-line">
           <div className="mx-auto flex max-w-[1320px] gap-0.5 overflow-x-auto px-4 sm:px-7">
             {grupo.itens.map((i) => {
-              const ativo = caminho === `/${i.rota}` || caminho.startsWith(`/${i.rota}/`);
+              const ativo = noAtalho(i.rota);
               return (
                 <Link
                   key={i.rota}
                   href={`/${i.rota}`}
                   aria-current={ativo ? "page" : undefined}
-                  className={`flex min-h-11 shrink-0 items-center border-b-[3px] px-3 ${ativo ? "border-gold font-bold text-navy" : "border-transparent font-medium text-muted"}`}
+                  title={i.emConstrucao ? "Em construção" : undefined}
+                  className={`flex min-h-11 shrink-0 items-center border-b-[3px] px-3 ${
+                    ativo ? "border-gold font-bold text-navy" : `border-transparent font-medium ${i.emConstrucao ? "text-muted/70" : "text-muted"}`
+                  }`}
                 >
                   {i.rotulo}
                 </Link>

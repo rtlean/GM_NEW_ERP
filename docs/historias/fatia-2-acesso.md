@@ -42,3 +42,15 @@ Tamanho: M · Depende de: US-2.2
 - Editar e-mail: o Supabase Auth manda confirmação para o novo endereço (padrão do serviço).
 - Telas liberáveis: as da v1 + Sicredi e WhatsApp (chaves de permissão; as telas em si são outras histórias).
 - Admin nunca é restringido, bloqueado ou redefinido pela tela (rejeitado no servidor, não só escondido).
+
+## Notas de implementação (layout do design: Entrar, Trocar senha, Usuários e menu, branch feat/design-acesso)
+- Entrar: painel de apresentação à esquerda, "Mostrar"/"Ocultar" na senha, links "Esqueci minha senha" e "Primeiro acesso" (o design usa o mesmo texto de título).
+- "Esqueci minha senha" não envia e-mail (e-mail automático está fora da v1). Mostra "Procure o administrador para redefinir sua senha." O administrador redefine em Usuários e acessos.
+- "Primeiro acesso": entra com a senha provisória, troca pela nova e encerra a sessão. Depois, a pessoa entra com a nova senha. A troca obrigatória após o login (`/trocar-senha`) continua valendo.
+- Trocar senha: um campo só, como no design (sem confirmação).
+- Usuários e acessos: lista com pílulas de situação, "Editar nome e e-mail", "Redefinir senha" e "Bloquear acesso" (só operacional), modelos "Secretária" e "Nenhuma tela", "Liberar todas" / "Restringir todas" conforme o estado do grupo. Cada marcação vale na hora.
+- Grupos de telas e modelos seguem o design (27 telas, incluindo as fora da v1).
+- Menu superior do design: módulos fora da v1 aparecem com a marca "Em construção" e abrem a página provisória. "Hoje" fica como atalho à direita.
+- Botão "Minha senha" saiu do menu, porque o design não o mostra. A rota `/trocar-senha` continua existindo.
+- O administrador continua sendo o único que gerencia usuários. Mudança de perfil do Geruzio depende de decisão do dono (não alterada nesta história).
+
