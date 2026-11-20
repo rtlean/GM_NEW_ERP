@@ -167,3 +167,17 @@ export async function listarLocatariosParaPainel(): Promise<LocatarioParaPainel[
 
   return (data ?? []).map((l) => ({ id: l.id, nome: l.full_name, telefone: l.phone, taxaBps: l.admin_fee_basis_points }));
 }
+
+/** Nome, e-mail e WhatsApp de cobrança dos inquilinos (US-4.9). Só leitura. */
+export async function listarContatosDeLocatarios(ids: number[]): Promise<Map<number, { nome: string; email: string | null; telefone: string | null }>> {
+  const mapa = new Map<number, { nome: string; email: string | null; telefone: string | null }>();
+  if (ids.length === 0) return mapa;
+  const { data, error } = await obterClienteServidor()
+    .from("tenants")
+    .select("id, full_name, email, phone")
+    .eq("company_id", EMPRESA_ID)
+    .in("id", ids);
+  if (error) throw new Error("Não foi possível carregar os inquilinos.");
+  for (const l of data ?? []) mapa.set(l.id, { nome: l.full_name, email: l.email, telefone: l.phone });
+  return mapa;
+}

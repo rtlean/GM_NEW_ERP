@@ -12,11 +12,18 @@ const TAMANHO_LOTE = 100;
 
 export type ResumoGeracao = { criadas: number; jaExistentes: number; totalCentavos: number };
 
-export type EntradaGerar = { competencia: string; usuarioId: number };
+export type EntradaGerar = {
+  competencia: string;
+  usuarioId: number;
+  /** Lista opcional de contratos (US-4.9). Sem lista, gera para todos os contratos ativos, como na US-4.1. */
+  contratoIds?: number[];
+};
 
-export async function gerarCobrancasDoMes({ competencia, usuarioId }: EntradaGerar): Promise<ResumoGeracao> {
+export async function gerarCobrancasDoMes({ competencia, usuarioId, contratoIds }: EntradaGerar): Promise<ResumoGeracao> {
   const db = obterClienteServidor();
-  const [contratos, imoveis] = await Promise.all([listarContratosAtivosNaCompetencia(competencia), listarImoveisParaSelecao()]);
+  const [contratosTodos, imoveis] = await Promise.all([listarContratosAtivosNaCompetencia(competencia), listarImoveisParaSelecao()]);
+  const escolhidos = contratoIds ? new Set(contratoIds) : null;
+  const contratos = escolhidos ? contratosTodos.filter((c) => escolhidos.has(c.id)) : contratosTodos;
   const locadorDoImovel = new Map(imoveis.map((i) => [i.id, i.ownerId]));
 
   const { data: existentes, error: erroExistentes } = await db
@@ -121,4 +128,32 @@ export async function recebidoPorLocador(competencia: string): Promise<Map<numbe
     mapa.set(linha.owner_id, atual);
   }
   return mapa;
+}
+
+/** Contratos que já têm cobrança na competência (US-4.9 mostra e bloqueia). Só leitura. */
+export async function contratosComCobrancaNaCompetencia(competencia: string): Promise<Set<number>> {
+  const { data, error } = await obterClienteServidor()
+    .from("monthly_entries")
+    .select("contract_id")
+    .eq("company_id", EMPRESA_ID)
+    .eq("competence", competencia)
+    .not("contract_id", "is", null);
+  if (error) throw new Error("Não foi possível verificar as cobranças do mês.");
+  return new Set((data ?? []).map((e) => e.contract_id as number));
+}
+
+/**
+ * Inquilinos com saldo em aberto em competência anterior (US-4.9: "Inquilino em atraso").
+ * Regra usada: alguma cobrança de mês anterior com pending_cents > 0.
+ */
+export async function inquilinosEmAtrasoAte(competencia: string): Promise<Set<number>> {
+  const { data, error } = await obterClienteServidor()
+    .from("monthly_entries")
+    .select("tenant_id")
+    .eq("company_id", EMPRESA_ID)
+    .lt("competence", competencia)
+    .gt("pending_cents", 0)
+    .not("tenant_id", "is", null);
+  if (error) throw new Error("Não foi possível verificar os atrasos.");
+  return new Set((data ?? []).map((e) => e.tenant_id as number));
 }

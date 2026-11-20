@@ -2,7 +2,7 @@
 
 **Objetivo:** relatório por locador igual ao modelo antigo, em PDF, e visão do mês para o dono.
 **Pronto quando:** o relatório Locatelli 11/2026 sai idêntico ao PDF modelo.
-Envio por e-mail/WhatsApp está **fora do escopo**: o PDF é baixado e enviado manualmente.
+Envio por e-mail/WhatsApp **não é automático**: os botões abrem o próprio app (e-mail ou WhatsApp) com texto pronto e o PDF é anexado manualmente (decisão do dono, 20/11/2026).
 
 ## US-5.1 Calcular o relatório
 **Como** dono **quero** os números calculados pelo back-end **para** ter um resultado único e confiável.
