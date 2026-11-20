@@ -46,5 +46,5 @@ export async function salvarImovelAction(_anterior: EstadoImovel | undefined, fo
   }
 
   revalidatePath("/imoveis");
-  redirect(`/imoveis?id=${gravadoId}`);
+  redirect(`/imoveis?id=${gravadoId}&salvo=1`);
 }

@@ -13,6 +13,7 @@ export type ImovelLista = {
   codigo: string;
   tipo: string | null;
   endereco: string;
+  cep: string | null;
   bairro: string | null;
   cidade: string;
   uf: string;
@@ -47,6 +48,7 @@ export async function listarImoveis(filtros: FiltrosImoveis = {}): Promise<Imove
     codigo: i.code,
     tipo: i.type,
     endereco: i.address,
+    cep: i.zip_code,
     bairro: i.bairro,
     cidade: i.city,
     uf: i.state,
