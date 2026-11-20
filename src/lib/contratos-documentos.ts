@@ -98,23 +98,27 @@ export async function anexarDocumento({ contratoId, arquivo, usuarioId }: Entrad
     .select("id")
     .single();
   if (erroRegistro || !registro) {
+    // Sem linha em contract_documents, o arquivo recém-enviado não tem registro de negócio; é desfeito.
     await db.storage.from(BUCKET).remove([chave]);
     throw new Error("Não foi possível registrar o arquivo. Tente de novo.");
   }
 
-  const { error: erroAuditoria } = await db.from("audit_events").insert({
+  const evento = {
     company_id: EMPRESA_ID,
     user_id: usuarioId,
     entity: "contract",
     entity_id: contratoId,
     action: anterior ? "contract.document_replaced" : "contract.document_uploaded",
     metadata: JSON.stringify({ versao, versaoAnterior: anterior?.versao ?? null, arquivo: arquivo.name, tipo }),
-  });
-  if (erroAuditoria) {
-    // Sem registro na auditoria, o envio é desfeito para não ficar arquivo sem histórico.
-    await db.from("contract_documents").delete().eq("id", registro.id);
-    await db.storage.from(BUCKET).remove([chave]);
-    throw new Error("Não foi possível registrar o envio na auditoria. Tente de novo.");
+  };
+  // Regra do projeto: não apagar registro de negócio. Se a auditoria falhar duas vezes, o arquivo fica
+  // registrado e a tela avisa para avisar o dono (nada é apagado).
+  const primeira = await db.from("audit_events").insert(evento);
+  if (primeira.error) {
+    const segunda = await db.from("audit_events").insert(evento);
+    if (segunda.error) {
+      throw new Error(`O arquivo foi guardado (versão ${versao}), mas não foi possível registrar na auditoria. Avise o dono do projeto.`);
+    }
   }
 
   return { versao, substituiu: anterior !== null };

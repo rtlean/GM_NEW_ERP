@@ -185,7 +185,7 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - Gravação e leitura em `src/lib/contratos-documentos.ts`. Arquivo no bucket privado `contract-documents`, em `supabase/contracts/1/<contrato>/v<versão>-<nome>.<ext>`.
 - Sem migração de banco: usa a tabela `contract_documents` já existente, uma linha por versão (`version`).
 - Limite de envio do Next elevado para 12 MB (`next.config.ts`, `serverActions.bodySizeLimit`), porque o padrão é 1 MB.
-- Se o registro da auditoria falhar, o envio é desfeito (arquivo e linha).
+- Se a auditoria falhar duas vezes, o arquivo fica guardado e a tela avisa para avisar o dono. Nada é apagado (regra do projeto).
 - Os 7 registros antigos de `contract_documents` não têm contrato (`contract_id` vazio) e são minutas `.docx` do sistema antigo (endereço `/manus-storage/...`). Não foram alterados.
 
 ## Nota de implementação — US-3.7 Alterar aluguel a partir de um mês (branch feat/us-3.7-alterar-aluguel)
