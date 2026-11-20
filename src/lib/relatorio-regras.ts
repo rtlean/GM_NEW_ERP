@@ -155,3 +155,28 @@ export function resumoRelatorio(linhas: LinhaLocatario[], despesasDoLocador: num
     totalAPagar: conta.repasseCentavos,
   };
 }
+
+/** Competências anteriores à informada, do mais antigo ao mais recente, sem incluir a própria (ex.: 2026-11, 3 → 2026-08, 09, 10). */
+export function competenciasAnteriores(competencia: string, quantidade: number): string[] {
+  const [ano, mes] = competencia.split("-").map(Number);
+  const saida: string[] = [];
+  for (let i = quantidade; i >= 1; i--) {
+    const total = ano * 12 + (mes - 1) - i;
+    const a = Math.floor(total / 12);
+    const m = (total % 12) + 1;
+    saida.push(`${a}-${String(m).padStart(2, "0")}`);
+  }
+  return saida;
+}
+
+/** Variação percentual (inteiro em centésimos de ponto, ex.: -1770 = -17,70%). Null quando não há base de comparação. */
+export function variacaoBps(atualCentavos: number, anteriorCentavos: number): number | null {
+  if (anteriorCentavos <= 0) return null;
+  return Math.round(((atualCentavos - anteriorCentavos) * 10000) / anteriorCentavos);
+}
+
+/** Taxa em basis points (0 a 10000) de dois números em centavos. Null quando o denominador é zero. */
+export function razaoBps(parte: number, todo: number): number | null {
+  if (todo <= 0) return null;
+  return Math.round((parte * 10000) / todo);
+}
