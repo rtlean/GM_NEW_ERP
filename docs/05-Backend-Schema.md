@@ -23,6 +23,8 @@ O sistema antigo **continua em uso** sobre essas tabelas. Consequências:
 | contratos | `contract_documents` | contract_id, file_name, storage_key, storage_url | 7 |
 | mês | `monthly_entries` | contract_id, competence (`AAAA-MM`), due_date, payment_date, status, rent_cents, paid_cents, pending_cents, encargos | 223 |
 | lançamentos | `monthly_expense_items` | competence, owner_id, property_id, description, amount_cents, charged_to | 95 |
+
+Lançamentos do locador (US-4.4, sem migração): categoria em `control_account_id` (contas de `controles_conta` ativas), data em `expense_date`, observação em `notes`, quem lançou em `created_by`. `charged_to` aceita `owner` ou `tenant` (o banco não tem "imobiliária"). Sem exclusão: corrigir é editar.
 | relatórios | `generated_reports`, `report_notes`, `report_exclusions`, `competence_closures` | — | 234 / 6 / 1 / 4 |
 | auditoria | `audit_events` | — | 2770 |
 
