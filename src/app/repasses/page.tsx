@@ -21,7 +21,7 @@ export default async function PaginaRepasses({ searchParams }: { searchParams: P
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-[32px] font-extrabold leading-tight tracking-tight text-navy">Repasses</h1>
-          <p className="text-muted">Repasse por locador. Taxa padrão 10%, descontadas as despesas cobradas do locador.</p>
+          <p className="text-muted">Repasse por locador. Taxa padrão 10% sobre o aluguel pago. Descontam-se também as despesas cobradas do locador.</p>
         </div>
         <form className="flex items-end gap-2">
           <label className="flex flex-col text-[13px] font-semibold text-navy">
@@ -48,7 +48,7 @@ export default async function PaginaRepasses({ searchParams }: { searchParams: P
               <input type="hidden" name="competencia" value={competencia} />
               <strong>{l.nome}</strong>
               <span className="tabular-nums">Recebido {formatarReais(l.recebidoCentavos)}</span>
-              <span className="tabular-nums text-muted">Taxa {(l.taxaBps / 100).toFixed(2).replace(".", ",")}% {formatarReais(l.taxaCentavos)}</span>
+              <span className="tabular-nums text-muted">Taxa {(l.taxaBps / 100).toFixed(2).replace(".", ",")}% sobre aluguel {formatarReais(l.aluguelPagoCentavos)} = {formatarReais(l.taxaCentavos)}</span>
               <span className="tabular-nums text-muted">Despesas {formatarReais(l.despesasCentavos)}</span>
               <strong className="tabular-nums">Repasse {formatarReais(l.repasseCentavos)}</strong>
               {l.liberadoEm ? (

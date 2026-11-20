@@ -3,12 +3,20 @@
 /** Taxa de administração padrão: 10% (1000 bps). Editável no cadastro do locador. */
 export const TAXA_PADRAO_BPS = 1000;
 
-export type EntradaRepasse = { recebidoCentavos: number; taxaBps: number | null; despesasCentavos: number };
+export type EntradaRepasse = {
+  recebidoCentavos: number;
+  aluguelPagoCentavos: number;
+  taxaBps: number | null;
+  despesasCentavos: number;
+};
 
-/** Taxa, despesas descontadas e repasse líquido. Repasse negativo significa despesa maior que o recebido. */
+/**
+ * Taxa incide só sobre o aluguel pago. O repasse é o total recebido (inclui multa e seguro)
+ * menos a taxa e as despesas cobradas do locador. Repasse negativo: despesa maior que o recebido.
+ */
 export function calcularRepasse(entrada: EntradaRepasse): { taxaCentavos: number; repasseCentavos: number; taxaBps: number } {
   const taxaBps = entrada.taxaBps ?? TAXA_PADRAO_BPS;
-  const taxaCentavos = Math.round((entrada.recebidoCentavos * taxaBps) / 10000);
+  const taxaCentavos = Math.round((entrada.aluguelPagoCentavos * taxaBps) / 10000);
   const repasseCentavos = entrada.recebidoCentavos - taxaCentavos - entrada.despesasCentavos;
   return { taxaCentavos, repasseCentavos, taxaBps };
 }

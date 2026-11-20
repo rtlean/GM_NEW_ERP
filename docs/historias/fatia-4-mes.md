@@ -83,8 +83,8 @@ Fora desta história: renovações com aditivo (envio para assinatura, tela "Ren
 ## US-4.8 Repasses manuais ao locador (em feat/us-4.8-repasses)
 **Como** secretária **quero** liberar o repasse de cada locador **para** registrar o que foi pago, sem fazer o Pix pelo sistema.
 - Tela **Repasses** por competência. Para cada locador: recebido (aluguel pago), taxa, despesas cobradas do locador e repasse líquido.
-- Taxa padrão 10%; se o locador tiver taxa própria no cadastro, ela vale.
-- Repasse = recebido − taxa − despesas cobradas do locador (mesma regra do relatório mensal).
+- Taxa padrão 10%, editável por locador. Taxa incide só sobre o aluguel pago (não sobre multa nem seguro).
+- Repasse = total recebido − taxa − despesas cobradas do locador (mesma regra do relatório mensal).
 - **Liberar** grava em `owner_repasses`: data, valor, taxa (coluna nova `admin_fee_cents`) e os dados bancários e Pix do locador no momento.
 - Um repasse por locador e competência. Não libera se já existe repasse, nem se o valor for zero ou negativo.
 - Repasses antigos (51 linhas de outubro e novembro/2026, vindas do sistema antigo) ficam como estão, sem alteração. Foram erros de digitação do sistema antigo, e a tela os mostra como "Liberado em…".
