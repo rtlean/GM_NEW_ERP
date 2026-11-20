@@ -68,3 +68,8 @@ Arquivo: `supabase/migrations/20261120090000_properties_detalhes_design_imoveis.
 - Eventos de auditoria: `entity = contract`, `action = contract.document_uploaded` ou `contract.document_replaced`, `metadata` em JSON texto (`versao`, `versaoAnterior`, `arquivo`, `tipo`).
 - Os 7 registros antigos têm `contract_id` vazio e não aparecem em nenhum contrato.
 
+## Migração: nenhuma (US-3.7, alterar aluguel)
+- Usa `contract_rent_changes` como está. Aluguel do mês = última alteração com `effective_date` até o dia 1 do mês; sem alteração, `contracts.rent_cents`.
+- Auditoria: `entity = contract`, `action = contract.rent_changed`, `metadata` JSON texto (`competencia`, `anteriorCentavos`, `novoCentavos`, `observacao`).
+- Lista de contratos, Dashboard e locatários leem o aluguel do mês atual em lote (`aluguelNoMesPorContrato`).
+

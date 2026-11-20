@@ -4,6 +4,8 @@ import { imoveisPorIds, listarImoveisParaSelecao, type ImovelParaSelecao } from 
 import { listarLocadoresParaPainel } from "./locadores";
 import { listarLocatariosParaPainel } from "./locatarios";
 import type { DadosContrato } from "./contratos-regras";
+import { aluguelNoMesPorContrato } from "./contratos-aluguel";
+import { competenciaAtual } from "./contratos-aluguel-regras";
 
 
 // Leitura de contratos para outros módulos (US-3.3). Só leitura. Toda consulta filtra company_id = 1.
@@ -20,15 +22,16 @@ export async function contratosAtivosPorLocatario(locatarioIds: number[]): Promi
 
   const { data, error } = await obterClienteServidor()
     .from("contracts")
-    .select("tenant_id, property_id, rent_cents")
+    .select("id, tenant_id, property_id, rent_cents, start_date")
     .eq("company_id", EMPRESA_ID)
     .eq("status", "active")
     .in("tenant_id", locatarioIds);
   if (error) throw new Error("Não foi possível carregar os contratos.");
 
+  const noMes = await aluguelNoMesPorContrato(data ?? [], competenciaAtual());
   for (const linha of data ?? []) {
     const lista = mapa.get(linha.tenant_id) ?? [];
-    lista.push({ propertyId: linha.property_id, aluguelCentavos: linha.rent_cents ?? 0 });
+    lista.push({ propertyId: linha.property_id, aluguelCentavos: noMes.get(linha.id) ?? 0 });
     mapa.set(linha.tenant_id, lista);
   }
   return mapa;
@@ -40,15 +43,16 @@ export type ContratoParaPainel = { locatarioId: number; propertyId: number; alug
 export async function listarContratosAtivosParaPainel(): Promise<ContratoParaPainel[]> {
   const { data, error } = await obterClienteServidor()
     .from("contracts")
-    .select("tenant_id, property_id, rent_cents, admin_fee_percent_basis_points")
+    .select("id, tenant_id, property_id, rent_cents, start_date, admin_fee_percent_basis_points")
     .eq("company_id", EMPRESA_ID)
     .eq("status", "active");
   if (error) throw new Error("Não foi possível carregar os contratos.");
 
+  const noMes = await aluguelNoMesPorContrato(data ?? [], competenciaAtual());
   return (data ?? []).map((c) => ({
     locatarioId: c.tenant_id,
     propertyId: c.property_id,
-    aluguelCentavos: c.rent_cents ?? 0,
+    aluguelCentavos: noMes.get(c.id) ?? 0,
     taxaPropria: c.admin_fee_percent_basis_points != null,
   }));
 }
@@ -86,6 +90,7 @@ export async function listarContratos(filtros: { busca?: string; situacao?: Filt
   const { data, error } = await consulta;
   if (error) throw new Error("Não foi possível carregar os contratos.");
   const linhas = data ?? [];
+  const noMes = await aluguelNoMesPorContrato(linhas, competenciaAtual());
 
   const [locatarios, locadores, imoveis] = await Promise.all([
     listarLocatariosParaPainel(),
@@ -103,7 +108,7 @@ export async function listarContratos(filtros: { busca?: string; situacao?: Filt
       imovelCodigo: imovel?.codigo ?? null,
       imovelTipo: imovel?.tipo ?? null,
       locador: imovel?.ownerId != null ? (nomeLocador.get(imovel.ownerId) ?? SEM_NOME) : SEM_NOME,
-      aluguelCentavos: c.rent_cents ?? 0,
+      aluguelCentavos: noMes.get(c.id) ?? 0,
       situacao: c.status as SituacaoContrato,
       inicio: c.start_date,
       fim: c.end_date,
