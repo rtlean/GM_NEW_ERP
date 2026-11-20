@@ -17,7 +17,7 @@ export const MENU: GrupoMenu[] = [
       { rota: "locatarios", rotulo: "Locatários" },
       { rota: "lancamentos", rotulo: "Lançamentos" },
       construcao("faturamento", "Faturamento"),
-      construcao("reajustes", "Reajustes"),
+      { rota: "reajustes", rotulo: "Reajustes" },
       { rota: "cobranca", rotulo: "Cobrança" },
       construcao("repasses", "Repasses"),
       { rota: "relatorio", rotulo: "Relatório mensal" },
