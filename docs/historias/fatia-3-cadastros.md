@@ -158,3 +158,11 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - Regras: CPF/CNPJ único; nome repetido não cria outro cadastro na inclusão (na edição não é checado); aviso de nomes parecidos (até 2 letras de diferença, sem contar LTDA, S/A, ME, EPP, EIRELI), só como alerta.
 - Na lista, locatário sem contrato ativo mostra "Sem imóvel" (o design mostrava "Novo" para cadastros novos).
 - Leitura de contratos em `src/lib/contratos.ts` e de imóveis em `src/lib/imoveis.ts`.
+
+## Nota de implementação — US-3.5a Contratos: lista e passos 1 a 3 (branch feat/contratos-lista)
+- Tela `/contratos` no layout do design, só para leitura: colunas Registro, Locatário, Imóvel, Locador, Aluguel e Situação (ativo, encerrado ou rascunho).
+- Filtros: Todos, Ativos e Encerrados (no lugar de "Sem contrato / Com contrato" do design, que dependem do PDF da US-3.6). Busca por locatário, locador, código ou tipo do imóvel.
+- Cabeçalho mostra registros, ativos e a soma dos aluguéis dos contratos ativos.
+- Assistente "Novo contrato": passo 1 escolhe o locador, passo 2 o imóvel (com aviso se já estiver alugado) e passo 3 o locatário. Ainda não grava nada.
+- Leitura em `src/lib/contratos.ts` (`listarContratos`, `listarImoveisParaContrato`) e em `src/lib/imoveis.ts` (`listarImoveisParaSelecao`).
+- Pendente para a US-3.5b: cadastro de novo imóvel e de novo locatário dentro do assistente; passos 4 e 5 (condições, revisão e gravação); a regra de imóvel alugado será comparada por id e não por nome; taxa de administração flexível (locador, depois locatário, depois 10%); o banco não tem coluna de dia de vencimento em `contracts`, então isso precisa de aprovação antes de qualquer migração.

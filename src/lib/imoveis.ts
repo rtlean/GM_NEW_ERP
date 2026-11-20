@@ -89,3 +89,17 @@ export async function listarImoveisParaPainel(): Promise<ImovelParaPainel[]> {
 
   return (data ?? []).map((i) => ({ id: i.id, tipo: i.type, ownerId: i.owner_id, aluguelCentavos: i.rent_cents ?? 0 }));
 }
+
+export type ImovelParaSelecao = { id: number; codigo: string | null; tipo: string | null; endereco: string | null; ownerId: number | null };
+
+/** Todos os imóveis da empresa para escolher em um contrato (com código, tipo, endereço e locador). Só leitura. */
+export async function listarImoveisParaSelecao(): Promise<ImovelParaSelecao[]> {
+  const { data, error } = await obterClienteServidor()
+    .from("properties")
+    .select("id, code, type, address, owner_id")
+    .eq("company_id", EMPRESA_ID)
+    .order("code", { ascending: true });
+  if (error) throw new Error("Não foi possível carregar os imóveis.");
+
+  return (data ?? []).map((i) => ({ id: i.id, codigo: i.code, tipo: i.type, endereco: i.address, ownerId: i.owner_id }));
+}
