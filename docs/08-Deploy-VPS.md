@@ -20,3 +20,15 @@
 
 ## Plano B
 Se o VPS ficar trabalhoso: publicar na Vercel (gratuito para começar) e apontar o domínio da Integrator para lá.
+
+## Publicação no painel Integrator Node.js (hospedagem compartilhada)
+Usado em 20/11/2026, no lugar do VPS, porque a conta tem o painel Integrator Node.js (não tem acesso root).
+
+1. Na sua máquina (ou no ambiente de build): `npm ci` e depois `npm run build:deploy`. Isso gera `.next/standalone` com `public` e `.next/static` copiados.
+2. Compacte a pasta do projeto contendo `server.js` (raiz) e `.next/standalone/`, e envie pela aba **Deploy** do painel (upload de arquivo).
+3. Na aba **Registrar**: Index = `server.js`; domínio `admgmimobiliaria.com.br`; Node.js 22 (ou o mais alto disponível); modo Produção.
+4. Variáveis de ambiente (cadastrar **antes** do build, pois `NEXT_PUBLIC_*` entram no código gerado): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`.
+5. Ativar HTTPS (AutoSSL) no cPanel depois que o DNS propagar (registro A para o IP compartilhado do servidor).
+6. Testar: `/api/health` responde `{"status":"ok"}`; `/login` abre; login funciona.
+
+Observação: como a chave `SUPABASE_SECRET_KEY` fica só no painel, nunca no repositório.
