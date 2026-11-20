@@ -109,3 +109,19 @@ Tamanho: P · Depende de: US-3.5
 - Situação do cadastro: Disponível ou Em manutenção. "Alugado" vem do contrato (US-3.5). Na edição, um imóvel alugado continua alugado.
 - Características (texto livre) gravadas em `properties.caracteristicas`.
 - Diferenças em relação ao design, para decisão: lista de tipos do design (inclui Depósito, Terreno e Ponto comercial, sem Consultório); campos de matrícula, IPTU, valor de venda, condomínio e comodidades do design não estão nesta versão.
+
+## Ajuste de layout: tela de Imóveis (PR 1, branch `fix/design-imoveis`)
+
+Motivo: o dono pediu que as telas sigam o layout do Claude Design (regra do projeto).
+
+- Lista e cadastro ficam na mesma tela (`/imoveis`). Cadastro em painel, não em página separada.
+- `/imoveis/novo` e `/imoveis/[id]/editar` agora só redirecionam para o painel.
+- Cards com selo de situação colorido, linha tipo · bairro · locador e barra "Cadastro X% completo".
+- Busca única por imóvel, bairro, código ou locador (filtros de locador e tipo saíram do topo).
+- Abas: Identificação, Características, Comodidades e Valores e vínculos.
+- Tipo "Consultório" voltou à lista (decisão do dono).
+- Progresso conta só os campos que já existem no banco: endereço, CEP, bairro, aluguel e locador.
+- Após salvar, volta ao painel com a marca "Salvo".
+
+Ainda fora (dependem de migração aditiva **não aprovada** para produção): nome de identificação, finalidade, situação "Vendido", matrícula, inscrição do IPTU, quartos, suítes, banheiros, vagas, áreas, andar, mobília, pets, valor de venda, condomínio, IPTU e comodidades. Número, cidade e UF continuam, por decisão do dono.
+Taxa de administração: continua flexível por locador (decisão do dono), sem padronizar.

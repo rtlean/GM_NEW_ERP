@@ -6,10 +6,10 @@ import { salvarImovelAction, type EstadoImovel } from "@/app/imoveis/actions";
 import { SITUACOES_DO_CADASTRO, TIPOS_DE_IMOVEL, type EntradaImovel } from "@/lib/cadastro-imovel";
 
 type Opcao = { id: number; nome: string };
-type Props = { inicial: EntradaImovel; opcoes: Opcao[]; id?: number };
+type Props = { inicial: EntradaImovel; opcoes: Opcao[]; id?: number; titulo: string; falta: string; salvo: boolean };
 
-const entrada = "min-h-11 rounded-[10px] border border-[#A9B4C6] px-3 text-[#0E1B33]";
-const ABAS = ["Identificação", "Características", "Valores e vínculos"] as const;
+const entrada = "min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3 text-[#0E1B33]";
+const ABAS = ["Identificação", "Características", "Comodidades", "Valores e vínculos"] as const;
 
 function Campo({ rotulo, erro, children }: { rotulo: string; erro?: string; children: React.ReactNode }) {
   return (
@@ -17,7 +17,7 @@ function Campo({ rotulo, erro, children }: { rotulo: string; erro?: string; chil
       <span className="font-semibold text-[#4F5B72]">{rotulo}</span>
       {children}
       {erro ? (
-        <span role="alert" className="text-sm font-semibold text-red-800">
+        <span role="alert" className="text-sm font-semibold text-[#8A1C1C]">
           {erro}
         </span>
       ) : null}
@@ -25,17 +25,42 @@ function Campo({ rotulo, erro, children }: { rotulo: string; erro?: string; chil
   );
 }
 
-export function FormularioImovel({ inicial, opcoes, id }: Props) {
+export function FormularioImovel({ inicial, opcoes, id, titulo, falta, salvo }: Props) {
   const [estado, acao, enviando] = useActionState<EstadoImovel | undefined, FormData>(salvarImovelAction, undefined);
   const [aba, setAba] = useState<(typeof ABAS)[number]>("Identificação");
   const erros = estado?.erros ?? {};
 
   return (
-    <form action={acao} className="flex flex-col gap-5 rounded-2xl border border-line bg-white p-6" noValidate>
+    <form
+      action={acao}
+      noValidate
+      aria-label="Cadastro do imóvel"
+      className="flex flex-col gap-4 rounded-2xl border border-[#E8ECF3] bg-white p-5 shadow-sm sm:p-6"
+    >
       {id ? <input type="hidden" name="id" value={id} /> : null}
       {id ? <input type="hidden" name="situacaoAtual" value={inicial.situacao} /> : null}
 
-      <div role="tablist" className="flex flex-wrap gap-1 border-b border-line">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[22px] font-extrabold leading-tight text-[#002356]">{titulo}</h2>
+          <p className="text-[#4F5B72]">{falta}</p>
+        </div>
+        <button
+          type="submit"
+          disabled={enviando}
+          className="min-h-11 rounded-[10px] bg-[#D4A853] px-5 font-bold text-[#002356] disabled:opacity-60"
+        >
+          {salvo && !estado ? "Salvo" : "Salvar imóvel"}
+        </button>
+      </div>
+
+      {estado?.erroGeral ? (
+        <p role="alert" className="rounded-[10px] bg-[#FBE9E9] p-3 font-semibold text-[#8A1C1C]">
+          {estado.erroGeral}
+        </p>
+      ) : null}
+
+      <div role="tablist" className="flex flex-wrap gap-1 border-b border-[#D8DEE9]">
         {ABAS.map((nome) => (
           <button
             key={nome}
@@ -43,7 +68,7 @@ export function FormularioImovel({ inicial, opcoes, id }: Props) {
             role="tab"
             aria-selected={aba === nome}
             onClick={() => setAba(nome)}
-            className={`min-h-11 border-b-[3px] px-4 font-semibold ${aba === nome ? "border-[#D4A853] text-navy" : "border-transparent text-muted"}`}
+            className={`min-h-11 border-b-[3px] px-4 font-semibold ${aba === nome ? "border-[#D4A853] font-bold text-[#0E1B33]" : "border-transparent text-[#0E1B33]"}`}
           >
             {nome}
           </button>
@@ -98,9 +123,14 @@ export function FormularioImovel({ inicial, opcoes, id }: Props) {
             rows={6}
             defaultValue={inicial.caracteristicas}
             placeholder="Ex.: 2 quartos, 1 suíte, 1 vaga de garagem, aceita pets"
-            className="rounded-[10px] border border-[#A9B4C6] px-3 py-2 text-[#0E1B33]"
+            className="rounded-[10px] border border-[#A9B4C6] bg-white px-3 py-2 text-[#0E1B33]"
           />
         </Campo>
+        <p className="text-sm text-[#4F5B72]">Os campos separados (quartos, suítes, áreas, mobília e pets) entram depois da migração do banco aprovada.</p>
+      </section>
+
+      <section hidden={aba !== "Comodidades"} className="flex flex-col gap-2">
+        <p className="text-[#4F5B72]">As comodidades e fotos entram depois da migração do banco aprovada.</p>
       </section>
 
       <section hidden={aba !== "Valores e vínculos"} className="grid gap-4 sm:grid-cols-2">
@@ -114,22 +144,14 @@ export function FormularioImovel({ inicial, opcoes, id }: Props) {
             ))}
           </select>
         </Campo>
-        <Campo rotulo="Aluguel de referência (R$)" erro={erros.aluguel}>
+        <Campo rotulo="Aluguel (R$)" erro={erros.aluguel}>
           <input name="aluguel" inputMode="decimal" defaultValue={inicial.aluguel} placeholder="1.200,00" className={entrada} />
         </Campo>
+        <p className="text-sm text-[#4F5B72] sm:col-span-2">O contrato deste imóvel aparece aqui quando o cadastro de contratos (US-3.5) for feito.</p>
       </section>
 
-      {estado?.erroGeral ? (
-        <p role="alert" className="font-semibold text-red-800">
-          {estado.erroGeral}
-        </p>
-      ) : null}
-
       <div className="flex gap-2">
-        <button type="submit" disabled={enviando} className="min-h-11 rounded-[10px] bg-[#D4A853] px-5 font-bold text-[#002356] disabled:opacity-60">
-          {id ? "Salvar alterações" : "Cadastrar imóvel"}
-        </button>
-        <Link href={id ? `/imoveis?id=${id}` : "/imoveis"} className="flex min-h-11 items-center rounded-[10px] border border-line px-5 font-semibold text-navy">
+        <Link href={id ? `/imoveis?id=${id}` : "/imoveis"} className="flex min-h-11 items-center rounded-[10px] border border-[#D8DEE9] px-5 font-semibold text-[#002356]">
           Cancelar
         </Link>
       </div>

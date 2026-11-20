@@ -5,6 +5,7 @@ export const TIPOS_DE_IMOVEL = [
   "Apartamento",
   "Casa",
   "Sala comercial",
+  "Consultório",
   "Kitnet",
   "Loja",
   "Ponto comercial",
@@ -114,4 +115,27 @@ export function validarImovel(entrada: EntradaImovel, situacaoAtual?: string): R
       caracteristicas: entrada.caracteristicas.trim() || null,
     },
   };
+}
+
+/** Campos que já existem no banco e contam para o "Cadastro X% completo" nesta etapa. */
+export const CAMPOS_DO_PROGRESSO = ["endereco", "cep", "bairro", "aluguel", "locador"] as const;
+export type CampoProgresso = (typeof CAMPOS_DO_PROGRESSO)[number];
+
+const ROTULO_DO_CAMPO: Record<CampoProgresso, string> = {
+  endereco: "endereço",
+  cep: "CEP",
+  bairro: "bairro",
+  aluguel: "aluguel",
+  locador: "locador",
+};
+
+/** Nomes dos campos ainda vazios, na ordem do design. */
+export function camposFaltando(preenchidos: Record<CampoProgresso, boolean>): string[] {
+  return CAMPOS_DO_PROGRESSO.filter((c) => !preenchidos[c]).map((c) => ROTULO_DO_CAMPO[c]);
+}
+
+/** Percentual de campos preenchidos, arredondado. */
+export function percentualDoCadastro(preenchidos: Record<CampoProgresso, boolean>): number {
+  const feitos = CAMPOS_DO_PROGRESSO.filter((c) => preenchidos[c]).length;
+  return Math.round((feitos / CAMPOS_DO_PROGRESSO.length) * 100);
 }
