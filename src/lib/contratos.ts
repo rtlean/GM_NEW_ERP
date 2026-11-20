@@ -225,3 +225,18 @@ export async function criarContrato(entrada: EntradaCriarContrato): Promise<Resu
 
   return { ok: true, id: novo.id };
 }
+
+/** Contratos ativos com o aluguel que vale numa competência escolhida (usado por Gerar cobranças, US-4.1). */
+export async function listarContratosAtivosNaCompetencia(competencia: string): Promise<{ id: number; tenantId: number | null; propertyId: number | null; aluguelCentavos: number }[]> {
+  const { data, error } = await obterClienteServidor()
+    .from("contracts")
+    .select("id, tenant_id, property_id, rent_cents, start_date")
+    .eq("company_id", EMPRESA_ID)
+    .eq("status", "active")
+    .order("id", { ascending: true });
+  if (error) throw new Error("Não foi possível carregar os contratos ativos.");
+
+  const linhas = data ?? [];
+  const noMes = await aluguelNoMesPorContrato(linhas, competencia);
+  return linhas.map((c) => ({ id: c.id, tenantId: c.tenant_id, propertyId: c.property_id, aluguelCentavos: noMes.get(c.id) ?? 0 }));
+}
