@@ -5,12 +5,19 @@ import { listarContratos, listarImoveisParaContrato, type FiltroSituacao } from 
 import { listarLocadoresParaPainel } from "@/lib/locadores";
 import { listarLocatariosParaPainel } from "@/lib/locatarios";
 import { AssistenteNovoContrato } from "@/components/contratos/AssistenteNovoContrato";
+import { documentosAtuaisPorContrato } from "@/lib/contratos-documentos";
+import { filtroArquivoValido, passaFiltroArquivo, rotuloArquivo, type FiltroArquivo } from "@/lib/contratos-lista-regras";
 
 // Tela de Contratos no layout do design: lista (leitura) e assistente de novo contrato (US-3.5b).
 const FILTROS: { valor: FiltroSituacao; rotulo: string }[] = [
   { valor: "todos", rotulo: "Todos" },
   { valor: "ativos", rotulo: "Ativos" },
   { valor: "encerrados", rotulo: "Encerrados" },
+];
+
+const ARQUIVO: { valor: FiltroArquivo; rotulo: string }[] = [
+  { valor: "com", rotulo: "Com contrato" },
+  { valor: "sem", rotulo: "Sem contrato" },
 ];
 
 const SITUACAO: Record<string, string> = { active: "Ativo", ended: "Encerrado", draft: "Rascunho" };
@@ -22,14 +29,15 @@ function dataCurta(iso: string): string {
 export default async function PaginaContratos({
   searchParams,
 }: {
-  searchParams: Promise<{ busca?: string; situacao?: string; novo?: string; criado?: string }>;
+  searchParams: Promise<{ busca?: string; situacao?: string; arquivo?: string; novo?: string; criado?: string }>;
 }) {
   await exigirAcesso("contratos");
-  const { busca = "", situacao = "todos", novo, criado } = await searchParams;
+  const { busca = "", situacao = "todos", arquivo, novo, criado } = await searchParams;
+  const filtroArquivo: FiltroArquivo = filtroArquivoValido(arquivo);
   const filtro: FiltroSituacao = FILTROS.some((f) => f.valor === situacao) ? (situacao as FiltroSituacao) : "todos";
   const mostrarAssistente = novo === "1";
 
-  const [linhas, todos, locadores, imoveis, locatarios] = await Promise.all([
+  const [linhasBase, todos, locadores, imoveis, locatarios] = await Promise.all([
     listarContratos({ busca, situacao: filtro }),
     listarContratos({}),
     mostrarAssistente ? listarLocadoresParaPainel() : Promise.resolve([]),
@@ -37,9 +45,13 @@ export default async function PaginaContratos({
     mostrarAssistente ? listarLocatariosParaPainel() : Promise.resolve([]),
   ]);
 
+  const documentos = await documentosAtuaisPorContrato(linhasBase.map((l) => l.id));
+  const linhas = linhasBase.filter((l) => passaFiltroArquivo(documentos.has(l.id), filtroArquivo));
+
   const ativos = todos.filter((c) => c.situacao === "active");
   const totalAtivos = ativos.reduce((soma, c) => soma + c.aluguelCentavos, 0);
-  const linkFiltro = (valor: FiltroSituacao) => `/contratos?situacao=${valor}${busca ? `&busca=${encodeURIComponent(busca)}` : ""}`;
+  const montarLink = (situacaoValor: string, arquivoValor: string) =>
+    `/contratos?situacao=${situacaoValor}&arquivo=${arquivoValor}${busca ? `&busca=${encodeURIComponent(busca)}` : ""}`;
 
   return (
     <div className="flex flex-col gap-5">
@@ -72,6 +84,7 @@ export default async function PaginaContratos({
       <div className="flex flex-wrap items-center gap-2">
         <form className="flex flex-1 flex-wrap items-center gap-2" action="/contratos">
           <input type="hidden" name="situacao" value={filtro} />
+          <input type="hidden" name="arquivo" value={filtroArquivo} />
           <input
             type="search"
             name="busca"
@@ -87,27 +100,39 @@ export default async function PaginaContratos({
         {FILTROS.map((f) => (
           <Link
             key={f.valor}
-            href={linkFiltro(f.valor)}
+            href={montarLink(f.valor, filtroArquivo)}
             aria-current={filtro === f.valor ? "true" : undefined}
             className={`flex min-h-11 items-center rounded-full border px-4 font-semibold ${filtro === f.valor ? "border-navy bg-navy text-white" : "border-[#D8DEE9] bg-white text-navy"}`}
           >
             {f.rotulo}
           </Link>
         ))}
+        {ARQUIVO.map((a) => (
+          <Link
+            key={a.valor}
+            href={montarLink(filtro, filtroArquivo === a.valor ? "todos" : a.valor)}
+            aria-current={filtroArquivo === a.valor ? "true" : undefined}
+            className={`flex min-h-11 items-center rounded-full border px-4 font-semibold ${filtroArquivo === a.valor ? "border-gold bg-[#FBF5E8] text-navy" : "border-[#D8DEE9] bg-white text-navy"}`}
+          >
+            {a.rotulo}
+          </Link>
+        ))}
       </div>
 
       <section className="overflow-auto rounded-2xl border border-line bg-white shadow-[0_1px_2px_rgba(0,35,86,.04),0_8px_24px_rgba(0,35,86,.06)]">
-        <div className="min-w-[960px]">
-          <div className="grid grid-cols-[70px_1.8fr_1.3fr_1.6fr_110px_160px] gap-3 border-b border-[#D8DEE9] px-4 py-2.5 text-[12px] font-semibold text-muted">
+        <div className="min-w-[1180px]">
+          <div className="grid grid-cols-[70px_1.8fr_1.3fr_1.6fr_110px_160px_120px_90px] gap-3 border-b border-[#D8DEE9] px-4 py-2.5 text-[12px] font-semibold text-muted">
             <span>Registro</span>
             <span>Locatário</span>
             <span>Imóvel</span>
             <span>Locador</span>
             <span className="text-right">Aluguel</span>
             <span>Situação</span>
+            <span>Arquivo</span>
+            <span />
           </div>
           {linhas.map((c) => (
-            <div key={c.id} className="grid grid-cols-[70px_1.8fr_1.3fr_1.6fr_110px_160px] items-center gap-3 border-b border-line px-4 py-2.5">
+            <div key={c.id} className="grid grid-cols-[70px_1.8fr_1.3fr_1.6fr_110px_160px_120px_90px] items-center gap-3 border-b border-line px-4 py-2.5">
               <Link href={`/contratos/${c.id}`} className="font-bold text-navy underline-offset-2 hover:underline">{c.id}</Link>
               <span>{c.locatario}</span>
               <span>{[c.imovelCodigo, c.imovelTipo].filter(Boolean).join(" · ") || "Sem imóvel"}</span>
@@ -120,6 +145,10 @@ export default async function PaginaContratos({
                   {c.fim ? ` · até ${dataCurta(c.fim)}` : ""}
                 </span>
               </span>
+              <span className="text-[13px]">{rotuloArquivo(documentos.get(c.id)?.tipo ?? null)}</span>
+              <Link href={`/contratos/${c.id}`} className="flex min-h-9 items-center justify-center rounded-[8px] border border-[#A9B4C6] px-3 text-[13px] font-semibold text-navy">
+                Abrir
+              </Link>
             </div>
           ))}
           {linhas.length === 0 ? <p className="px-4 py-6 text-muted">Nenhum registro encontrado.</p> : null}
