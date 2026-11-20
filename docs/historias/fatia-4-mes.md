@@ -16,7 +16,7 @@ Tamanho: M · Depende de: US-3.7
 - Só cria para contrato ativo que ainda não tem cobrança no mês. Cobrança que já existe (ex.: set/out/nov de 2026, vindas do sistema antigo) não é alterada nem duplicada.
 - Aluguel do mês pela regra já testada (`src/lib/aluguel.ts`). A função `fn_aluguel_vigente`, citada acima, não existe no banco.
 - Grava em `monthly_entries`: pago zero, pendente igual ao aluguel, status `open`. Auditoria `charges.generated`. Nada apagado.
-- Limite conhecido: o banco não tem trava única por contrato + competência. Dois cliques ao mesmo tempo podem criar duplicata. Trava no banco exige migração aprovada à parte.
+- Não duplica: o banco já tem trava única por contrato + competência (`monthly_entries_contract_competence_uq`). Dois cliques ao mesmo tempo não criam duplicata: o segundo ignora a linha que já existe.
 - Tela de atrasos, negociação e negativação (US-4.3) continuam fora desta entrega; o desenho `Cobranca.dc.html` é dessa tela.
 
 ## US-4.2 Registrar pagamento

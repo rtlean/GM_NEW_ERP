@@ -50,7 +50,10 @@ export async function gerarCobrancasDoMes({ competencia, usuarioId }: EntradaGer
 
   for (let i = 0; i < plano.criar.length; i += TAMANHO_LOTE) {
     const lote = plano.criar.slice(i, i + TAMANHO_LOTE);
-    const { error } = await db.from("monthly_entries").insert(lote.map((c) => linhaDaCobranca(c, usuarioId)));
+    // Trava única já existe no banco (contract_id, competence). Se outro clique gravou antes, a linha é ignorada, sem erro.
+    const { error } = await db
+      .from("monthly_entries")
+      .upsert(lote.map((c) => linhaDaCobranca(c, usuarioId)), { onConflict: "contract_id,competence", ignoreDuplicates: true });
     if (error) {
       const detalhe = `${error.message}${error.details ? ` | ${error.details}` : ""}${error.hint ? ` | dica: ${error.hint}` : ""}`;
       if (i === 0) {
