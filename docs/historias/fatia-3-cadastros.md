@@ -166,3 +166,14 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - Assistente "Novo contrato": passo 1 escolhe o locador, passo 2 o imóvel (com aviso se já estiver alugado) e passo 3 o locatário. Ainda não grava nada.
 - Leitura em `src/lib/contratos.ts` (`listarContratos`, `listarImoveisParaContrato`) e em `src/lib/imoveis.ts` (`listarImoveisParaSelecao`).
 - Pendente para a US-3.5b: cadastro de novo imóvel e de novo locatário dentro do assistente; passos 4 e 5 (condições, revisão e gravação); a regra de imóvel alugado será comparada por id e não por nome; taxa de administração flexível (locador, depois locatário, depois 10%); o banco não tem coluna de dia de vencimento em `contracts`, então isso precisa de aprovação antes de qualquer migração.
+
+## Nota de implementação — US-3.5b Contratos: condições, revisão e gravação (branch feat/contratos-criar)
+- Migração aditiva aprovada pelo dono: coluna `contracts.due_day` (dia de vencimento, 1 a 28, opcional). Arquivo em `supabase/migrations/20261120110000_contracts_dia_vencimento.sql`. Testada antes em transação com desfazer e aplicada depois da aprovação.
+- Assistente com 5 passos: locador, imóvel, locatário, condições e revisão. Gravação só no último passo.
+- Locatário novo é cadastrado no próprio assistente, com as regras do cadastro de locatário (nome e CPF/CNPJ obrigatórios). Se o CPF/CNPJ já existir, o sistema pede para escolher o locatário existente.
+- Imóvel novo continua no cadastro completo da tela de Imóveis (link no passo 2). O cadastro completo exige área, CEP e demais campos, por isso não foi repetido dentro do assistente.
+- Imóvel já alugado: mesmo locatário é renovação (o contrato anterior termina na data de início do novo); outro locatário bloqueia a gravação. A comparação é por id do locatário.
+- Taxa de administração: sugestão do locador; se ele não tiver (0% conta como não definido), a do locatário; se nenhum tiver, 10%. Pode ser alterada no contrato.
+- Regras puras em `src/lib/contratos-regras.ts` (testadas). Gravação em `criarContrato` (`src/lib/contratos.ts`) e action em `src/app/contratos/actions.ts`.
+- Se a gravação do novo contrato falhar depois do encerramento do anterior, o anterior é reativado.
+- Pendentes: edição de contrato (US-3.7), encerramento (US-3.8) e PDF (US-3.6).
