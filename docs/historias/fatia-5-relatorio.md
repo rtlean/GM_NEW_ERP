@@ -7,7 +7,7 @@ Envio por e-mail/WhatsApp **não é automático**: os botões abrem o próprio a
 ## US-5.1 Calcular o relatório
 **Como** dono **quero** os números calculados pelo back-end **para** ter um resultado único e confiável.
 - `GET /api/relatorios/{locadorId}/{competencia}` retorna: aluguéis recebidos, taxa, despesas descontadas, créditos e líquido.
-- Teste com dados do Locatelli 11/2026: totais 43.028 / 29.808 / 27.592,49.
+- Teste com dados do Locatelli 11/2026 (confirmados pelo dono em 20/11/2026): previsto R$ 43.028,00 e total recebido R$ 29.808,00. Taxa 0% (acordo entre o locador e o Geruzio, como está no banco). O valor R$ 27.592,49 do sistema antigo não é usado como teste.
 
 Tamanho: M · Depende de: US-4.4, US-4.5
 
@@ -47,3 +47,14 @@ Primeira versão da tela, antes da US-4.3 (mês e cobranças). Os valores vêm s
 - **Maiores locadores:** top 6 pelo aluguel dos contratos ativos dos imóveis de cada locador.
 
 Regras puras em `src/lib/dashboard-regras.ts` (testadas). Leitura em cada módulo: `listarContratosAtivosParaPainel`, `listarImoveisParaPainel`, `listarLocadoresParaPainel`, `listarLocatariosParaPainel`.
+
+
+## Implementação (feat/us-5.1-relatorio)
+- Tela `/relatorio` segue o design `RelatorioMensal.dc.html` e o PDF `RelatorioPDF.dc.html`, com todas as linhas do design.
+- Números vêm da mesma conta da tela de Repasses (taxa sobre o aluguel pago, despesas cobradas do locador). Nada é gravado.
+- Seguro imóvel e seguro fiança ficam zerados até o módulo de Seguros existir. Taxa de pintura, água, luz e limpeza vêm das despesas do mês.
+- "Valor boleto" = aluguel mais multa (decisão do dono, 20/11/2026).
+- "Valor líquido recebido" = total recebido. "Valor líquido a repassar" = total recebido menos taxa e despesas do locador.
+- Desempenho das locações fica fora desta versão (decisão do dono).
+- Botões de e-mail e WhatsApp abrem o app com texto pronto. Não enviam sozinhos.
+- Pendente: campo CONFERIDO (só admin), da US-5.3.
