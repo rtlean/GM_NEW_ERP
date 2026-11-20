@@ -247,3 +247,20 @@ export async function concluirTrocaDeSenha(email: string): Promise<void> {
     .eq("email", email.trim().toLowerCase());
   if (error) throw error;
 }
+
+/** Id do usuário com este e-mail, se ele pertencer à empresa. Usado para gravar quem fez cada ação na auditoria. */
+export async function idDoUsuarioPorEmail(email: string): Promise<number | null> {
+  const db = obterClienteServidor();
+  const { data: usuario, error } = await db.from("users").select("id").eq("email", email.trim().toLowerCase()).maybeSingle();
+  if (error) throw error;
+  if (!usuario) return null;
+
+  const { data: vinculo, error: erroVinculo } = await db
+    .from("company_users")
+    .select("user_id")
+    .eq("company_id", EMPRESA_ID)
+    .eq("user_id", usuario.id)
+    .maybeSingle();
+  if (erroVinculo) throw erroVinculo;
+  return vinculo ? usuario.id : null;
+}
