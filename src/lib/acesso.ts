@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { iatDoToken } from "./sessao";
 import { podeAbrirTela, podeEntrar, precisaTrocarSenha, sessaoValida, type PerfilAcesso } from "./permissoes";
 import { criarClienteSessao } from "./supabase/sessao";
-import { buscarPerfilPorEmail } from "./usuarios";
+import { buscarPerfilPorEmail, idDoUsuarioPorEmail } from "./usuarios";
 
 /** Perfil de quem está logado agora; null se não há sessão, se a conta não existe na empresa ou se a sessão foi encerrada. */
 export async function perfilAtual(): Promise<PerfilAcesso | null> {
@@ -43,4 +43,18 @@ export async function exigirAcesso(tela: string): Promise<void> {
   const perfil = await exigirSessaoAtiva();
   if (precisaTrocarSenha(perfil) && tela !== "trocar-senha") redirect("/trocar-senha");
   if (!podeAbrirTela(perfil, tela)) notFound();
+}
+
+/** Id de quem está logado (para a auditoria); null se não há sessão válida. */
+export async function idUsuarioAtual(): Promise<number | null> {
+  const supabase = await criarClienteSessao();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user?.email) return null;
+  return idDoUsuarioPorEmail(data.user.email);
+}
+
+/** Confere sem redirecionar: a tela está liberada para quem está logado? Para rotas de arquivo (API). */
+export async function telaLiberada(tela: string): Promise<boolean> {
+  const perfil = await perfilAtual();
+  return !!perfil && !precisaTrocarSenha(perfil) && podeAbrirTela(perfil, tela);
 }

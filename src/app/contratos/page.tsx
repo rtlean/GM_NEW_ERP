@@ -108,7 +108,7 @@ export default async function PaginaContratos({
           </div>
           {linhas.map((c) => (
             <div key={c.id} className="grid grid-cols-[70px_1.8fr_1.3fr_1.6fr_110px_160px] items-center gap-3 border-b border-line px-4 py-2.5">
-              <strong>{c.id}</strong>
+              <Link href={`/contratos/${c.id}`} className="font-bold text-navy underline-offset-2 hover:underline">{c.id}</Link>
               <span>{c.locatario}</span>
               <span>{[c.imovelCodigo, c.imovelTipo].filter(Boolean).join(" · ") || "Sem imóvel"}</span>
               <span>{c.locador}</span>

@@ -37,7 +37,7 @@ Tabelas fora da v1 (não mexer): `financial_ledger_entries`, `expense_allocation
 | 4 | Sistema antigo aplica regra proporcional (RN01) em mudança de aluguel | **Decidido:** vale o mês inteiro. Alterar aluguel só pelo ERP novo; histórico antigo fica como foi cobrado |
 | 5 | Sistema antigo **parado** por decisão do dono (18/11/2026) | ERP novo é o único que grava; mesmo assim, toda mudança de esquema é testada antes em **branch** do Supabase. Movimentações feitas fora do sistema nesse intervalo serão lançadas no ERP |
 | 6 | `contracts.start_date` é `timestamptz` | Ler como data local (America/Sao_Paulo) |
-| 7 | PDFs em `contract_documents.storage_key` (Supabase Storage) | Ler pelo back-end com a chave do Supabase guardada em segredo |
+| 7 | Arquivos do contrato (PDF ou Word) em `contract_documents.storage_key`, bucket privado `contract-documents` | Ler e gravar só pelo servidor; o navegador recebe os bytes pela rota `/api/contratos/{id}/arquivo` |
 
 ## 4. Aluguel vigente (regra do mês inteiro)
 Aluguel da competência M = `rent_cents` da última `contract_rent_changes` com `effective_date` ≤ 1º dia de M; se não houver, `contracts.rent_cents`. Implementado em `src/lib/aluguel.ts` (`aluguelVigente`) com teste.
@@ -61,3 +61,10 @@ Arquivo: `supabase/migrations/20261120090000_properties_detalhes_design_imoveis.
 - `occupancy_status`: novo valor `sold` (Vendido).
 - `properties`: `name`, `finality`, `matricula`, `iptu_registration`, `bedrooms`, `suites`, `bathrooms`, `parking_spots`, `useful_area_m2`, `total_area_m2`, `floor`, `furnishing`, `pets_allowed`, `sale_value_cents`, `condominium_cents`, `iptu_cents`, `amenities` (text[]).
 - Valores monetários em centavos (inteiro). Áreas em m² (numeric 10,2).
+
+## Migração: nenhuma (US-3.6, anexo do contrato)
+- Usa `contract_documents` como está: `contract_id`, `file_name`, `mime_type` (PDF ou Word), `storage_key`, `version` (1, 2, 3...), `created_by`, `updated_by`.
+- Cada envio é uma linha nova. A versão atual é a de maior `version` do contrato. Nada é apagado.
+- Eventos de auditoria: `entity = contract`, `action = contract.document_uploaded` ou `contract.document_replaced`, `metadata` em JSON texto (`versao`, `versaoAnterior`, `arquivo`, `tipo`).
+- Os 7 registros antigos têm `contract_id` vazio e não aparecem em nenhum contrato.
+

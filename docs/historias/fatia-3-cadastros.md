@@ -46,11 +46,12 @@ Tamanho: M · Depende de: US-3.2
 
 Tamanho: G → dividir em 3.5a (passos 1–3) e 3.5b (passos 4–5) · Depende de: US-3.3, US-3.4
 
-## US-3.6 Anexar PDF do contrato
-**Como** secretária **quero** anexar o PDF assinado **para** consultar quando precisar.
-- Aceita só PDF até 10 MB; salvo no Supabase Storage e registrado em `contract_documents` (mesmo padrão do sistema antigo).
-- Dado contrato com PDF, então botão "Ver contrato" abre o arquivo (`GET /api/contratos/{id}/pdf`, exige login).
-- Substituir PDF mantém registro na auditoria.
+## US-3.6 Anexar PDF ou Word do contrato
+**Como** secretária **quero** anexar o contrato assinado ou editado **para** consultar e baixar quando precisar.
+- Aceita **PDF ou Word (.docx)** até 10 MB. O conteúdo é conferido (PDF começa com `%PDF`; Word é um pacote com `word/document.xml`), não só a extensão.
+- Dado contrato com arquivo, então "Baixar contrato" baixa o arquivo atual pela rota `GET /api/contratos/{id}/arquivo` (exige login e tela de contratos).
+- Substituir cria uma nova versão; as versões anteriores continuam no Storage e nada é apagado.
+- Cada envio registra um evento em `audit_events` (`contract.document_uploaded` ou `contract.document_replaced`).
 
 Tamanho: P · Depende de: US-3.5
 
@@ -176,4 +177,14 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - Taxa de administração: sugestão do locador; se ele não tiver (0% conta como não definido), a do locatário; se nenhum tiver, 10%. Pode ser alterada no contrato.
 - Regras puras em `src/lib/contratos-regras.ts` (testadas). Gravação em `criarContrato` (`src/lib/contratos.ts`) e action em `src/app/contratos/actions.ts`.
 - Se a gravação do novo contrato falhar depois do encerramento do anterior, o anterior é reativado.
-- Pendentes: edição de contrato (US-3.7), encerramento (US-3.8) e PDF (US-3.6).
+- Pendentes: edição de contrato (US-3.7) e encerramento (US-3.8).
+
+## Nota de implementação — US-3.6 Anexo do contrato (branch feat/us-3.6-anexo-contrato)
+- Tela de detalhe `/contratos/{id}` com o bloco "Contrato assinado": mostra o arquivo atual, "Baixar contrato" e o formulário "Anexar" ou "Substituir". Clicar no número do contrato na lista abre a tela.
+- Regras puras em `src/lib/contratos-documentos-regras.ts` (testadas): tipo, tamanho, conteúdo, nome limpo e caminho.
+- Gravação e leitura em `src/lib/contratos-documentos.ts`. Arquivo no bucket privado `contract-documents`, em `supabase/contracts/1/<contrato>/v<versão>-<nome>.<ext>`.
+- Sem migração de banco: usa a tabela `contract_documents` já existente, uma linha por versão (`version`).
+- Limite de envio do Next elevado para 12 MB (`next.config.ts`, `serverActions.bodySizeLimit`), porque o padrão é 1 MB.
+- Se o registro da auditoria falhar, o envio é desfeito (arquivo e linha).
+- Os 7 registros antigos de `contract_documents` não têm contrato (`contract_id` vazio) e são minutas `.docx` do sistema antigo (endereço `/manus-storage/...`). Não foram alterados.
+
