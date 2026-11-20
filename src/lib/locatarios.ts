@@ -1,24 +1,33 @@
 import "server-only";
 import { obterClienteServidor } from "./supabase/server";
-import { contarContratosAtivosPorLocatario } from "./contratos";
+import { contratosAtivosPorLocatario } from "./contratos";
+import { imoveisPorIds } from "./imoveis";
+import { listarOpcoesDeLocador } from "./locadores-cadastro";
 import type { DadosLocatario } from "./cadastro-locatario";
 
-// Regras e acesso a dados dos locatários (US-3.3). Toda consulta filtra company_id = 1.
-// Não apaga nada. Os vínculos com locadores só são adicionados, nunca removidos nesta versão.
+// Regras e acesso a dados dos locatários (US-3.3, layout do design). Toda consulta filtra company_id = 1.
+// Não apaga nada. O vínculo com imóveis e locadores vem dos contratos ativos (leitura em contratos.ts e imoveis.ts).
 
 const EMPRESA_ID = 1;
+
+export type FiltroLocatarios = "todos" | "mais-de-um-imovel";
 
 export type LocatarioLinha = {
   id: number;
   nome: string;
   documento: string | null;
-  telefone: string | null;
-  email: string | null;
-  locadores: { id: number; nome: string }[];
-  contratosAtivos: number;
+  quantidadeImoveis: number;
 };
 
-export type FiltrosLocatarios = { busca?: string };
+export type ImovelDoLocatario = {
+  id: number;
+  codigo: string;
+  tipo: string | null;
+  locador: string;
+  aluguelCentavos: number;
+};
+
+export type FiltrosLocatarios = { busca?: string; filtro?: FiltroLocatarios };
 
 function filtroBusca(busca: string): string | null {
   const termo = busca.trim().replace(/[,()%*]/g, "");
@@ -29,42 +38,11 @@ function filtroBusca(busca: string): string | null {
   return condicoes.join(",");
 }
 
-async function locadoresDosLocatarios(ids: number[]): Promise<Map<number, { id: number; nome: string }[]>> {
-  const mapa = new Map<number, { id: number; nome: string }[]>();
-  if (ids.length === 0) return mapa;
-  const cliente = obterClienteServidor();
-  const { data: vinculos, error } = await cliente
-    .from("tenant_owners")
-    .select("tenant_id, owner_id")
-    .eq("company_id", EMPRESA_ID)
-    .in("tenant_id", ids);
-  if (error) throw new Error("Não foi possível carregar os locadores do locatário.");
-
-  const ownerIds = [...new Set((vinculos ?? []).map((v) => v.owner_id))];
-  const nomes = new Map<number, string>();
-  if (ownerIds.length > 0) {
-    const { data: owners, error: erroOwners } = await cliente
-      .from("owners")
-      .select("id, full_name")
-      .eq("company_id", EMPRESA_ID)
-      .in("id", ownerIds);
-    if (erroOwners) throw new Error("Não foi possível carregar os locadores do locatário.");
-    for (const o of owners ?? []) nomes.set(o.id, o.full_name);
-  }
-
-  for (const v of vinculos ?? []) {
-    const lista = mapa.get(v.tenant_id) ?? [];
-    lista.push({ id: v.owner_id, nome: nomes.get(v.owner_id) ?? "Locador" });
-    mapa.set(v.tenant_id, lista);
-  }
-  return mapa;
-}
-
-/** Lista os locatários da empresa com a busca por nome ou CPF/CNPJ. */
+/** Lista os locatários da empresa, em ordem de nome, com a quantidade de imóveis (contratos ativos). */
 export async function listarLocatarios(filtros: FiltrosLocatarios = {}): Promise<LocatarioLinha[]> {
   let consulta = obterClienteServidor()
     .from("tenants")
-    .select("id, full_name, document, phone, email")
+    .select("id, full_name, document")
     .eq("company_id", EMPRESA_ID)
     .order("full_name", { ascending: true });
   const filtro = filtroBusca(filtros.busca ?? "");
@@ -73,33 +51,65 @@ export async function listarLocatarios(filtros: FiltrosLocatarios = {}): Promise
   const { data, error } = await consulta;
   if (error) throw new Error("Não foi possível carregar os locatários.");
   const linhas = data ?? [];
-  const ids = linhas.map((l) => l.id);
+  const contratos = await contratosAtivosPorLocatario(linhas.map((l) => l.id));
 
-  const [locadores, contratos] = await Promise.all([locadoresDosLocatarios(ids), contarContratosAtivosPorLocatario(ids)]);
-
-  return linhas.map((l) => ({
+  const lista = linhas.map((l) => ({
     id: l.id,
     nome: l.full_name,
     documento: l.document,
-    telefone: l.phone,
-    email: l.email,
-    locadores: locadores.get(l.id) ?? [],
-    contratosAtivos: contratos.get(l.id) ?? 0,
+    quantidadeImoveis: contratos.get(l.id)?.length ?? 0,
   }));
+  return filtros.filtro === "mais-de-um-imovel" ? lista.filter((l) => l.quantidadeImoveis > 1) : lista;
 }
 
-/** Locatário pelo id, com os locadores ligados. Null se não existir na empresa. */
+/** Nome e id de todos os locatários da empresa, para o aviso de nomes parecidos. */
+export async function listarNomesDeLocatarios(): Promise<{ id: number; nome: string }[]> {
+  const { data, error } = await obterClienteServidor()
+    .from("tenants")
+    .select("id, full_name")
+    .eq("company_id", EMPRESA_ID);
+  if (error) throw new Error("Não foi possível carregar os locatários.");
+  return (data ?? []).map((l) => ({ id: l.id, nome: l.full_name }));
+}
+
+/** Locatário pelo id, com os imóveis dos contratos ativos. Null se não existir na empresa. */
 export async function buscarLocatario(id: number) {
   const { data, error } = await obterClienteServidor()
     .from("tenants")
-    .select("id, full_name, document, cpf, email, phone")
+    .select("id, full_name, document, rg, email, phone, notes")
     .eq("company_id", EMPRESA_ID)
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error("Não foi possível carregar o locatário.");
   if (!data) return null;
-  const locadores = (await locadoresDosLocatarios([id])).get(id) ?? [];
-  return { ...data, locadores };
+
+  const contratos = (await contratosAtivosPorLocatario([id])).get(id) ?? [];
+  const [imoveis, locadores] = await Promise.all([
+    imoveisPorIds(contratos.map((c) => c.propertyId)),
+    listarOpcoesDeLocador(),
+  ]);
+  const nomeDoLocador = new Map(locadores.map((o) => [o.id, o.nome]));
+
+  const lista: ImovelDoLocatario[] = contratos.flatMap((c) => {
+    const imovel = imoveis.get(c.propertyId);
+    if (!imovel) return [];
+    return [
+      {
+        id: c.propertyId,
+        codigo: imovel.codigo,
+        tipo: imovel.tipo,
+        locador: (imovel.ownerId && nomeDoLocador.get(imovel.ownerId)) || "Locador não encontrado",
+        aluguelCentavos: c.aluguelCentavos,
+      },
+    ];
+  });
+
+  return {
+    ...data,
+    imoveis: lista,
+    quantidadeLocadores: new Set(lista.map((i) => i.locador)).size,
+    totalAluguelCentavos: lista.reduce((soma, i) => soma + i.aluguelCentavos, 0),
+  };
 }
 
 /** Outro locatário com o mesmo CPF/CNPJ, se existir. */
@@ -117,30 +127,33 @@ export async function locatarioComDocumento(documento: string, ignorarId?: numbe
   return linha ? { id: linha.id, nome: linha.full_name } : null;
 }
 
-/** Cria ou atualiza o locatário e adiciona os vínculos com os locadores escolhidos. */
-export async function salvarLocatario(dados: DadosLocatario, locadorIds: number[], id?: number): Promise<number> {
+/** Outro locatário com exatamente o mesmo nome (sem diferenciar maiúsculas), se existir. */
+export async function locatarioComNome(nome: string): Promise<{ id: number; nome: string } | null> {
+  const seguro = nome.replace(/[%_\\]/g, "\\$&");
+  const { data, error } = await obterClienteServidor()
+    .from("tenants")
+    .select("id, full_name")
+    .eq("company_id", EMPRESA_ID)
+    .ilike("full_name", seguro)
+    .limit(1);
+  if (error) throw new Error("Não foi possível verificar o nome.");
+  const linha = data?.[0];
+  return linha ? { id: linha.id, nome: linha.full_name } : null;
+}
+
+/** Cria ou atualiza os dados do locatário. Não mexe nos vínculos: eles nascem nos contratos. */
+export async function salvarLocatario(dados: DadosLocatario, id?: number): Promise<number> {
   const cliente = obterClienteServidor();
-  let tenantId = id;
   if (id) {
     const { error } = await cliente.from("tenants").update(dados).eq("company_id", EMPRESA_ID).eq("id", id);
     if (error) throw new Error("Não foi possível salvar as alterações.");
-  } else {
-    const { data, error } = await cliente
-      .from("tenants")
-      .insert({ ...dados, company_id: EMPRESA_ID, owner_id: locadorIds[0] })
-      .select("id")
-      .single();
-    if (error || !data) throw new Error("Não foi possível cadastrar o locatário.");
-    tenantId = data.id;
+    return id;
   }
-
-  const { error: erroVinculo } = await cliente
-    .from("tenant_owners")
-    .upsert(
-      locadorIds.map((owner_id) => ({ company_id: EMPRESA_ID, tenant_id: tenantId!, owner_id })),
-      { onConflict: "company_id,tenant_id,owner_id", ignoreDuplicates: true },
-    );
-  if (erroVinculo) throw new Error("Não foi possível salvar os locadores do locatário.");
-
-  return tenantId!;
+  const { data, error } = await cliente
+    .from("tenants")
+    .insert({ ...dados, company_id: EMPRESA_ID })
+    .select("id")
+    .single();
+  if (error || !data) throw new Error("Não foi possível cadastrar o locatário.");
+  return data.id;
 }
