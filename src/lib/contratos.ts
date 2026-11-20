@@ -28,3 +28,22 @@ export async function contratosAtivosPorLocatario(locatarioIds: number[]): Promi
   }
   return mapa;
 }
+
+export type ContratoParaPainel = { locatarioId: number; propertyId: number; aluguelCentavos: number; taxaPropria: boolean };
+
+/** Todos os contratos ativos com o aluguel do contrato, para o painel (Dashboard). Só leitura. */
+export async function listarContratosAtivosParaPainel(): Promise<ContratoParaPainel[]> {
+  const { data, error } = await obterClienteServidor()
+    .from("contracts")
+    .select("tenant_id, property_id, rent_cents, admin_fee_percent_basis_points")
+    .eq("company_id", EMPRESA_ID)
+    .eq("status", "active");
+  if (error) throw new Error("Não foi possível carregar os contratos.");
+
+  return (data ?? []).map((c) => ({
+    locatarioId: c.tenant_id,
+    propertyId: c.property_id,
+    aluguelCentavos: c.rent_cents ?? 0,
+    taxaPropria: c.admin_fee_percent_basis_points != null,
+  }));
+}

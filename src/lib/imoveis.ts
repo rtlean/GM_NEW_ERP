@@ -76,3 +76,16 @@ export async function imoveisPorIds(ids: number[]): Promise<Map<number, ImovelRe
   for (const i of data ?? []) mapa.set(i.id, { codigo: i.code, tipo: i.type, ownerId: i.owner_id });
   return mapa;
 }
+
+export type ImovelParaPainel = { id: number; tipo: string | null; ownerId: number | null; aluguelCentavos: number };
+
+/** Todos os imóveis da empresa com tipo, locador e aluguel cadastrado, para o painel (Dashboard). Só leitura. */
+export async function listarImoveisParaPainel(): Promise<ImovelParaPainel[]> {
+  const { data, error } = await obterClienteServidor()
+    .from("properties")
+    .select("id, type, owner_id, rent_cents")
+    .eq("company_id", EMPRESA_ID);
+  if (error) throw new Error("Não foi possível carregar os imóveis.");
+
+  return (data ?? []).map((i) => ({ id: i.id, tipo: i.type, ownerId: i.owner_id, aluguelCentavos: i.rent_cents ?? 0 }));
+}
