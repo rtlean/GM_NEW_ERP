@@ -16,16 +16,16 @@ export type PerfilAcesso = {
 /** Tela que só o administrador abre; nunca liberada para o operacional. */
 export const TELA_SO_ADMIN = "usuarios";
 
-/** Telas que o admin pode liberar para o operacional, agrupadas como no design "Usuários e acessos". */
+/** Telas que o admin pode liberar para o operacional, nos mesmos grupos do design "Usuários e acessos". */
 export const GRUPOS_DE_TELAS: { chave: string; rotulo: string; telas: { chave: string; rotulo: string }[] }[] = [
-  { chave: "visao", rotulo: "Visão geral", telas: [{ chave: "dashboard", rotulo: "Dashboard" }] },
   {
-    chave: "imoveis",
-    rotulo: "Imóveis e locadores",
+    chave: "crm",
+    rotulo: "CRM",
     telas: [
+      { chave: "dashboard", rotulo: "Dashboard" },
+      { chave: "hoje", rotulo: "Hoje" },
+      { chave: "pipeline", rotulo: "Pipeline" },
       { chave: "imoveis", rotulo: "Imóveis" },
-      { chave: "locadores", rotulo: "Locadores" },
-      { chave: "locatarios", rotulo: "Locatários" },
     ],
   },
   {
@@ -33,8 +33,56 @@ export const GRUPOS_DE_TELAS: { chave: string; rotulo: string; telas: { chave: s
     rotulo: "Locação",
     telas: [
       { chave: "contratos", rotulo: "Contratos" },
+      { chave: "locadores", rotulo: "Locadores" },
+      { chave: "locatarios", rotulo: "Locatários" },
       { chave: "lancamentos", rotulo: "Lançamentos" },
+      { chave: "faturamento", rotulo: "Faturamento" },
+      { chave: "reajustes", rotulo: "Reajustes" },
+      { chave: "cobranca", rotulo: "Cobrança" },
+      { chave: "repasses", rotulo: "Repasses" },
       { chave: "relatorio", rotulo: "Relatório mensal" },
+    ],
+  },
+  {
+    chave: "financeiro",
+    rotulo: "Financeiro",
+    telas: [
+      { chave: "extrato", rotulo: "Pagar e receber" },
+      { chave: "leitura", rotulo: "Ler documento" },
+      { chave: "conciliacao", rotulo: "Conciliação" },
+      { chave: "relatorios", rotulo: "Relatórios" },
+    ],
+  },
+  {
+    chave: "conta-digital",
+    rotulo: "Conta digital",
+    telas: [
+      { chave: "conta", rotulo: "Extrato da conta" },
+      { chave: "pagamentos", rotulo: "Pagamentos e Pix" },
+    ],
+  },
+  {
+    chave: "fiscal",
+    rotulo: "Fiscal",
+    telas: [
+      { chave: "notas", rotulo: "Notas fiscais" },
+      { chave: "dimob", rotulo: "DIMOB e IR" },
+    ],
+  },
+  {
+    chave: "protecao",
+    rotulo: "Proteção",
+    telas: [
+      { chave: "seguros", rotulo: "Seguros" },
+      { chave: "garantias", rotulo: "Garantias" },
+    ],
+  },
+  {
+    chave: "credito",
+    rotulo: "Crédito",
+    telas: [
+      { chave: "consorcio", rotulo: "Consórcio" },
+      { chave: "financiamento", rotulo: "Financiamento" },
     ],
   },
   {
@@ -45,6 +93,16 @@ export const GRUPOS_DE_TELAS: { chave: string; rotulo: string; telas: { chave: s
       { chave: "whatsapp", rotulo: "WhatsApp" },
     ],
   },
+];
+
+/** Modelos de acesso do design: um clique marca ou desmarca um conjunto de telas. */
+export const MODELOS_DE_ACESSO: { chave: string; rotulo: string; telas: string[] }[] = [
+  {
+    chave: "secretaria",
+    rotulo: "Secretária",
+    telas: ["hoje", "pipeline", "imoveis", "contratos", "locadores", "locatarios", "lancamentos", "faturamento", "reajustes", "cobranca", "leitura"],
+  },
+  { chave: "nenhuma", rotulo: "Nenhuma tela", telas: [] },
 ];
 
 /** Todas as chaves de tela que o admin pode liberar. */
@@ -68,6 +126,11 @@ export function menuPermitido(perfil: PerfilAcesso | null, menu: GrupoMenu[] = M
   return menu
     .map((g) => ({ ...g, itens: g.itens.filter((i) => podeAbrirTela(perfil, i.rota)) }))
     .filter((g) => g.itens.length > 0);
+}
+
+/** Atalhos da barra (ex.: "Hoje") que o usuário pode abrir. */
+export function atalhosPermitidos(perfil: PerfilAcesso | null, atalhos: ItemMenu[] = []): ItemMenu[] {
+  return atalhos.filter((i) => podeAbrirTela(perfil, i.rota));
 }
 
 /** Primeira tela do menu que o usuário pode abrir (usada logo após o login). */

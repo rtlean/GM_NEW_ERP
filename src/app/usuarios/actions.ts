@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { exigirAcesso } from "@/lib/acesso";
-import { gerarSenhaProvisoria } from "@/lib/senha";
+import { gerarSenhaProvisoria, senhaAtendeRegras } from "@/lib/senha";
 import { buscarUsuario, criarOperacional, definirBloqueio, editarContato, redefinirSenha, salvarTelas } from "@/lib/usuarios";
-import { GRUPOS_DE_TELAS } from "@/lib/permissoes";
+import { GRUPOS_DE_TELAS, MODELOS_DE_ACESSO } from "@/lib/permissoes";
 
 // Todas as ações conferem o acesso no servidor: só o admin passa por exigirAcesso("usuarios").
 
@@ -23,15 +23,16 @@ function idDoFormulario(formData: FormData): number {
 
 export type EstadoCriar = { erro?: string; senha?: string; id?: number; nome?: string };
 
-/** Cria o operacional com senha provisória (mostrada uma única vez). */
+/** Cria o operacional com a senha provisória do formulário (gerada no botão "Gerar"); ela aparece uma única vez. */
 export async function criarUsuarioAction(_anterior: EstadoCriar | undefined, formData: FormData): Promise<EstadoCriar> {
   await exigirAcesso("usuarios");
   const nome = String(formData.get("nome") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
+  const senha = String(formData.get("senha") ?? "");
   if (!nome) return { erro: "Informe o nome." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { erro: "Informe um e-mail válido." };
+  if (!senhaAtendeRegras(senha)) return { erro: "A senha provisória precisa ter 10 caracteres ou mais, com letras e números." };
 
-  const senha = gerarSenhaProvisoria();
   try {
     const id = await criarOperacional(nome, email, senha);
     revalidatePath("/usuarios");
@@ -92,7 +93,12 @@ export async function salvarTelasAction(formData: FormData) {
   try {
     const grupo = String(formData.get("grupo") ?? "");
     let telas: string[];
-    if (grupo) {
+    const modelo = String(formData.get("modelo") ?? "");
+    if (modelo) {
+      const escolhido = MODELOS_DE_ACESSO.find((m) => m.chave === modelo);
+      if (!escolhido) throw new Error("Modelo de acesso não encontrado.");
+      telas = escolhido.telas;
+    } else if (grupo) {
       const [acao, chave] = grupo.split(":");
       const usuario = await buscarUsuario(id);
       if (!usuario) throw new Error("Usuário não encontrado nesta empresa.");

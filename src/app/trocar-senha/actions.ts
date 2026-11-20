@@ -10,10 +10,8 @@ import { criarClienteSessao } from "@/lib/supabase/sessao";
 export async function trocarSenhaAction(_estadoAnterior: { erro?: string } | undefined, formData: FormData) {
   await exigirSessaoAtiva();
   const nova = String(formData.get("nova") ?? "");
-  const confirmacao = String(formData.get("confirmacao") ?? "");
 
   if (!senhaAtendeRegras(nova)) return { erro: "A senha precisa ter 10 caracteres ou mais, com letras e números." };
-  if (nova !== confirmacao) return { erro: "As senhas não são iguais." };
 
   const supabase = await criarClienteSessao();
   const { error } = await supabase.auth.updateUser({ password: nova });

@@ -1,21 +1,21 @@
+import Image from "next/image";
 import { exigirSessaoAtiva } from "@/lib/acesso";
 import { FormularioTrocarSenha } from "@/components/usuarios/FormularioTrocarSenha";
 
-export default async function PaginaTrocarSenha({
-  searchParams,
-}: {
-  searchParams: Promise<{ voluntaria?: string }>;
-}) {
+// Troca obrigatória (senha provisória ou redefinida pelo administrador), no mesmo visual da tela de Entrar.
+export default async function PaginaTrocarSenha() {
   await exigirSessaoAtiva();
-  const { voluntaria } = await searchParams;
 
   return (
-    <section className="mx-auto mt-10 max-w-sm rounded-lg border border-line bg-white p-8">
-      <h1 className="mb-2 text-2xl font-bold">{voluntaria ? "Trocar minha senha" : "Escolha sua senha"}</h1>
-      <p className="mb-6 text-muted">
-        {voluntaria ? "Digite a nova senha para o seu acesso." : "Sua senha provisória precisa ser trocada antes de continuar."}
-      </p>
-      <FormularioTrocarSenha />
-    </section>
+    <main className="flex min-h-[70vh] items-center justify-center px-6 py-10">
+      <div className="flex w-full max-w-[400px] flex-col gap-5">
+        <Image src="/logo.png" alt="Soluções Imobiliárias" width={210} height={60} className="h-auto w-[210px]" />
+        <div>
+          <h1 className="text-[28px] font-extrabold leading-tight text-navy">Escolha sua senha</h1>
+          <p className="mt-1 text-muted">Sua senha provisória precisa ser trocada antes de continuar.</p>
+        </div>
+        <FormularioTrocarSenha />
+      </div>
+    </main>
   );
 }
