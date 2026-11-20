@@ -26,6 +26,8 @@ O sistema antigo **continua em uso** sobre essas tabelas. Consequências:
 
 Cobranças do mês (US-4.1, sem migração): `monthly_entries` recebe uma linha por contrato ativo e competência (`status` `open`, `rent_cents`, `pending_cents`, `due_date` dia 10). Já existem linhas de 2026-09 a 2026-11 do sistema antigo; a geração não as altera. Trava única por contrato + competência já existe (`monthly_entries_contract_competence_uq`); a geração ignora duplicata sem erro.
 
+Aditivo de reajuste em PDF (US-4.7, sem migração): gera PDF com `pdf-lib` e grava em `contract_documents` como nova versão (`file_name` "Aditivo reajuste AAAA-MM-DD.pdf"). Lê o reajuste de `contract_rent_changes`. Auditoria `contract.addendum_generated`.
+
 Reajuste pelo índice (US-4.6, sem migração): grava em `contract_rent_changes` com observação `Reajuste <índice> <percentual>%`. Usa `contracts.adjustment_index` e o dia do início do contrato.
 
 Lançamentos do locador (US-4.4, sem migração): categoria em `control_account_id` (contas de `controles_conta` ativas), data em `expense_date`, observação em `notes`, quem lançou em `created_by`. `charged_to` aceita `owner` ou `tenant` (o banco não tem "imobiliária"). Sem exclusão: corrigir é editar.

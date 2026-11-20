@@ -67,4 +67,15 @@ Tamanho: P · Depende de: US-4.2
 - Não aplica duas vezes: se já existe reajuste daquele contrato na mesma data, recusa.
 - Auditoria: a alteração de aluguel já registra `contract.rent_changed`.
 
-Fora desta história: renovações com aditivo (US-4.7, gerar o aditivo em PDF com o logotipo, envio manual).
+Fora desta história: renovações com aditivo (envio para assinatura, tela "Renovações" do desenho).
+
+## US-4.7 Aditivo de reajuste em PDF (em feat/us-4.7-aditivo-reajuste)
+**Como** secretária **quero** gerar o aditivo do reajuste já agendado **para** ter o documento para o locador e o locatário.
+- Na tela Reajustes, seção "Reajustes agendados · aditivo": botão **Gerar aditivo** em cada reajuste agendado.
+- PDF com a logo da Soluções Imobiliárias, dados do locador, locatário e imóvel, índice, percentual, valor anterior e novo, e vigência. Sem testemunhas e sem validação jurídica (uso interno).
+- Os valores vêm da alteração de aluguel já gravada (não são digitados de novo).
+- Guardado como nova versão em `contract_documents` (bucket privado `contract-documents`). Nada é apagado.
+- Recusa se faltar CPF/CNPJ do locador ou do locatário.
+- Auditoria: `contract.addendum_generated`.
+- Sem migração: usa as tabelas existentes. Dependência nova: `pdf-lib`.
+- Efeito colateral: o aditivo passa a ser a versão atual do arquivo do contrato (a maior versão). Ver a PR.

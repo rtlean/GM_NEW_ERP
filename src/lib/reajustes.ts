@@ -5,7 +5,7 @@ import { aluguelNoMesPorContrato, registrarAlteracaoAluguel } from "./contratos-
 import { listarLocatariosParaPainel } from "./locatarios";
 import { listarImoveisParaSelecao } from "./imoveis";
 import { dataDoBanco } from "./contratos-encerrar-regras";
-import { dentroDaJanela, proximoAniversario, validarReajuste, type EntradaReajuste } from "./reajustes-regras";
+import { dentroDaJanela, JANELA_DIAS, proximoAniversario, validarReajuste, type EntradaReajuste } from "./reajustes-regras";
 
 // Reajuste pelo índice (US-4.6). Grava pela alteração de aluguel (US-3.7): mês inteiro, sem retroativo.
 // Nunca altera nem apaga linha existente. Toda consulta filtra company_id = 1.
@@ -101,4 +101,78 @@ export async function aplicarReajuste(params: { contratoId: number; entrada: Ent
     return { ok: false, erro: erro instanceof Error ? erro.message : "Não foi possível aplicar o reajuste." };
   }
   return { ok: true, novoCentavos: dados.novoCentavos, dataEfetiva: dados.dataEfetiva };
+}
+
+export type ReajusteAgendado = {
+  contratoId: number;
+  inquilino: string;
+  imovel: string;
+  dataEfetiva: string;
+  anteriorCentavos: number;
+  novoCentavos: number;
+  observacao: string | null;
+};
+
+/** Reajustes já agendados (alteração de aluguel com observação "Reajuste…") que começam dentro da janela. */
+export async function listarReajustesAgendados(hoje: string): Promise<ReajusteAgendado[]> {
+  const fim = new Date(`${hoje}T12:00:00Z`);
+  fim.setUTCDate(fim.getUTCDate() + JANELA_DIAS);
+  const limite = fim.toISOString().slice(0, 10);
+
+  const { data, error } = await obterClienteServidor()
+    .from("contract_rent_changes")
+    .select("contract_id, effective_date, rent_cents, previous_rent_cents, note")
+    .eq("company_id", EMPRESA_ID)
+    .like("note", "Reajuste%")
+    .gte("effective_date", hoje)
+    .lte("effective_date", limite)
+    .order("effective_date", { ascending: true });
+  if (error) throw new Error("Não foi possível carregar os reajustes agendados.");
+  if (!data || data.length === 0) return [];
+
+  const [contratos, locatarios, imoveis] = await Promise.all([listarContratosParaReajuste(), listarLocatariosParaPainel(), listarImoveisParaSelecao()]);
+  const contratoPorId = new Map(contratos.map((c) => [c.id, c]));
+  const nomeLocatario = new Map(locatarios.map((l) => [l.id, l.nome]));
+  const imovelPorId = new Map(imoveis.map((i) => [i.id, i]));
+
+  return data.flatMap((r) => {
+    const c = contratoPorId.get(r.contract_id);
+    if (!c) return [];
+    const im = imovelPorId.get(c.propertyId);
+    return [
+      {
+        contratoId: r.contract_id,
+        inquilino: nomeLocatario.get(c.tenantId) ?? "Locatário",
+        imovel: im ? `${im.tipo ?? "Tipo não informado"} · ${im.codigo ?? im.endereco ?? "Sem código"}` : "Imóvel",
+        dataEfetiva: r.effective_date,
+        anteriorCentavos: r.previous_rent_cents ?? c.rentCents,
+        novoCentavos: r.rent_cents,
+        observacao: r.note,
+      },
+    ];
+  });
+}
+
+/** Reajuste agendado de um contrato numa data, para gerar o aditivo. Null se não existir. */
+export async function buscarReajusteAgendado(contratoId: number, dataEfetiva: string): Promise<ReajusteAgendado | null> {
+  const { data, error } = await obterClienteServidor()
+    .from("contract_rent_changes")
+    .select("contract_id, effective_date, rent_cents, previous_rent_cents, note")
+    .eq("company_id", EMPRESA_ID)
+    .eq("contract_id", contratoId)
+    .eq("effective_date", dataEfetiva)
+    .like("note", "Reajuste%")
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error("Não foi possível carregar o reajuste.");
+  if (!data) return null;
+  return {
+    contratoId: data.contract_id,
+    inquilino: "",
+    imovel: "",
+    dataEfetiva: data.effective_date,
+    anteriorCentavos: data.previous_rent_cents ?? 0,
+    novoCentavos: data.rent_cents,
+    observacao: data.note,
+  };
 }
