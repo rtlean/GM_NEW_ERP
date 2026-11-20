@@ -6,6 +6,9 @@ import { listarContratos } from "@/lib/contratos";
 import { documentoAtual } from "@/lib/contratos-documentos";
 import { listarHistoricoAluguel } from "@/lib/contratos-aluguel";
 import { competenciaAtual, competenciaParaTexto } from "@/lib/contratos-aluguel-regras";
+import { buscarParaEncerrar } from "@/lib/contratos-encerrar";
+import { hojeSaoPaulo } from "@/lib/contratos-encerrar-regras";
+import { FormularioEncerrar } from "@/components/contratos/FormularioEncerrar";
 import { FormularioAnexo } from "@/components/contratos/FormularioAnexo";
 import { FormularioAluguel } from "@/components/contratos/FormularioAluguel";
 
@@ -21,11 +24,11 @@ export default async function PaginaContrato({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ anexado?: string; aluguel?: string }>;
+  searchParams: Promise<{ anexado?: string; aluguel?: string; encerrado?: string }>;
 }) {
   await exigirAcesso("contratos");
   const { id } = await params;
-  const { anexado, aluguel } = await searchParams;
+  const { anexado, aluguel, encerrado } = await searchParams;
   const contratoId = Number(id);
   if (!Number.isInteger(contratoId) || contratoId <= 0) notFound();
 
@@ -34,6 +37,8 @@ export default async function PaginaContrato({
   const arquivo = await documentoAtual(contratoId);
   const historico = await listarHistoricoAluguel(contratoId);
   const mesAtual = competenciaAtual();
+  const ativo = contrato.situacao === "active";
+  const paraEncerrar = ativo ? await buscarParaEncerrar(contratoId) : null;
 
   return (
     <div className="flex flex-col gap-5">
@@ -48,6 +53,12 @@ export default async function PaginaContrato({
           </p>
         </div>
       </header>
+
+      {encerrado ? (
+        <p role="status" className="rounded-[12px] bg-[#DDF0E7] p-3.5 font-semibold text-[#17533B]">
+          Contrato encerrado. Último mês cobrado: {competenciaParaTexto(encerrado)}.
+        </p>
+      ) : null}
 
       {aluguel ? (
         <p role="status" className="rounded-[12px] bg-[#DDF0E7] p-3.5 font-semibold text-[#17533B]">
@@ -105,7 +116,11 @@ export default async function PaginaContrato({
       <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
         <section className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(0,35,86,.04),0_8px_24px_rgba(0,35,86,.06)]">
           <h2 className="text-[18px] font-bold text-navy">Alterar aluguel</h2>
-          <FormularioAluguel contratoId={contrato.id} mesAtual={mesAtual} />
+          {ativo ? (
+            <FormularioAluguel contratoId={contrato.id} mesAtual={mesAtual} />
+          ) : (
+            <p className="text-muted">Contrato encerrado: o aluguel não pode mais ser alterado.</p>
+          )}
         </section>
 
         <section className="flex flex-col gap-3 rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(0,35,86,.04),0_8px_24px_rgba(0,35,86,.06)]">
@@ -130,6 +145,21 @@ export default async function PaginaContrato({
           )}
         </section>
       </div>
+
+      {ativo && paraEncerrar ? (
+        <section className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(0,35,86,.04),0_8px_24px_rgba(0,35,86,.06)]">
+          <h2 className="text-[18px] font-bold text-navy">Encerrar contrato</h2>
+          <p className="text-[14px] text-muted">
+            O contrato deixa de ser ativo e as cobranças param depois do último mês escolhido. Nada é apagado: o histórico continua na tela.
+          </p>
+          <FormularioEncerrar
+            contratoId={contrato.id}
+            locatarioNome={paraEncerrar.locatarioNome}
+            enderecoImovel={paraEncerrar.enderecoImovel}
+            hoje={hojeSaoPaulo()}
+          />
+        </section>
+      ) : null}
     </div>
   );
 }

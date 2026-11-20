@@ -199,3 +199,13 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - Evento de auditoria `contract.rent_changed`. Se a auditoria falhar duas vezes, a alteração fica gravada e a tela avisa para avisar o dono (sem apagar nada).
 - Pendente: o aluguel do imóvel (`properties.rent_cents`) continua separado e não é alterado por esta história. O Dashboard compara o aluguel do contrato com o do imóvel e pode mostrar diferença após uma alteração.
 
+## Nota de implementação — US-3.8 Encerrar contrato (branch feat/us-3.8-encerrar-contrato)
+- Botão "Encerrar contrato" no detalhe, só para contrato ativo. Pede data de fim (não pode ser anterior a hoje nem ao início), mostra o último mês cobrado e exige digitar o nome do locatário (sem diferença de maiúsculas, acento ou espaços). Mostra locatário e endereço do imóvel.
+- Gravação: `status` vira `ended` (valor do banco; a história escreve "encerrado") e `end_date` recebe a data de fim no fuso de São Paulo. Nada é apagado.
+- Evento de auditoria `contract.ended`. Se a auditoria falhar duas vezes, o encerramento fica e a tela avisa.
+- Contrato encerrado não mostra mais o bloco de alteração de aluguel; o histórico continua visível.
+- Imóvel volta a aparecer como disponível no assistente de novo contrato (regra existente: só contrato ativo ocupa o imóvel).
+- Dashboard e lista de ativos não contam contrato encerrado.
+- Cobranças após o último mês dependem do módulo de mês (fatia 4).
+- Sem migração de banco.
+
