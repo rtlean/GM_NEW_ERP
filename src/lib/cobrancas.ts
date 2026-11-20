@@ -52,8 +52,12 @@ export async function gerarCobrancasDoMes({ competencia, usuarioId }: EntradaGer
     const lote = plano.criar.slice(i, i + TAMANHO_LOTE);
     const { error } = await db.from("monthly_entries").insert(lote.map((c) => linhaDaCobranca(c, usuarioId)));
     if (error) {
+      const detalhe = `${error.message}${error.details ? ` | ${error.details}` : ""}${error.hint ? ` | dica: ${error.hint}` : ""}`;
+      if (i === 0) {
+        throw new Error(`Nenhuma cobrança foi gravada. Motivo do banco: ${detalhe}`);
+      }
       throw new Error(
-        `Parte das cobranças foi gravada (${i} de ${plano.criar.length}) e a geração parou. Confira o mês antes de gerar de novo. Avise o dono do projeto.`,
+        `Parte das cobranças foi gravada (${i} de ${plano.criar.length}) e a geração parou. Motivo do banco: ${detalhe}. Confira o mês antes de gerar de novo. Avise o dono do projeto.`,
       );
     }
   }
