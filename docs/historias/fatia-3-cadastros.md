@@ -188,3 +188,14 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - Se o registro da auditoria falhar, o envio é desfeito (arquivo e linha).
 - Os 7 registros antigos de `contract_documents` não têm contrato (`contract_id` vazio) e são minutas `.docx` do sistema antigo (endereço `/manus-storage/...`). Não foram alterados.
 
+## Nota de implementação — US-3.7 Alterar aluguel a partir de um mês (branch feat/us-3.7-alterar-aluguel)
+- Bloco "Alterar aluguel" no detalhe do contrato: mês (a partir do atual, sem retroativo), novo valor e observação opcional. Mostra antes de salvar a frase "A partir de MM/AAAA, aluguel de R$ ... no mês inteiro".
+- Cada alteração é uma linha nova em `contract_rent_changes` (`previous_rent_cents`, `effective_date` no dia 1 do mês, `note`, `created_by`). Nenhuma linha antiga é alterada nem apagada.
+- Histórico no detalhe: mês de vigência, valor anterior, valor novo, quem fez e quando.
+- Só contrato ativo pode ser alterado. Mês anterior ao início do contrato é recusado.
+- Lista de contratos, Dashboard e a soma de aluguel por locatário passam a mostrar o aluguel do mês atual (regra de `src/lib/aluguel.ts`). Antes mostravam o valor original de `contracts.rent_cents`.
+- Cobranças pagas não mudam. Como o módulo de mês (fatia 4) ainda não gera meses futuros, as 5 cobranças abertas de novembro/2026 ficam como estão, por decisão do dono.
+- Mais de uma alteração no mesmo mês é permitida: vale a última, e o histórico mostra todas.
+- Evento de auditoria `contract.rent_changed`. Se a auditoria falhar duas vezes, a alteração fica gravada e a tela avisa para avisar o dono (sem apagar nada).
+- Pendente: o aluguel do imóvel (`properties.rent_cents`) continua separado e não é alterado por esta história. O Dashboard compara o aluguel do contrato com o do imóvel e pode mostrar diferença após uma alteração.
+

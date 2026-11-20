@@ -4,7 +4,10 @@ import { exigirAcesso } from "@/lib/acesso";
 import { formatarReais } from "@/lib/dinheiro";
 import { listarContratos } from "@/lib/contratos";
 import { documentoAtual } from "@/lib/contratos-documentos";
+import { listarHistoricoAluguel } from "@/lib/contratos-aluguel";
+import { competenciaAtual, competenciaParaTexto } from "@/lib/contratos-aluguel-regras";
 import { FormularioAnexo } from "@/components/contratos/FormularioAnexo";
+import { FormularioAluguel } from "@/components/contratos/FormularioAluguel";
 
 // Detalhe do contrato com o bloco "Contrato assinado" (US-3.6).
 const SITUACAO: Record<string, string> = { active: "Ativo", ended: "Encerrado", draft: "Rascunho" };
@@ -18,17 +21,19 @@ export default async function PaginaContrato({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ anexado?: string }>;
+  searchParams: Promise<{ anexado?: string; aluguel?: string }>;
 }) {
   await exigirAcesso("contratos");
   const { id } = await params;
-  const { anexado } = await searchParams;
+  const { anexado, aluguel } = await searchParams;
   const contratoId = Number(id);
   if (!Number.isInteger(contratoId) || contratoId <= 0) notFound();
 
   const contrato = (await listarContratos({})).find((c) => c.id === contratoId);
   if (!contrato) notFound();
   const arquivo = await documentoAtual(contratoId);
+  const historico = await listarHistoricoAluguel(contratoId);
+  const mesAtual = competenciaAtual();
 
   return (
     <div className="flex flex-col gap-5">
@@ -44,6 +49,12 @@ export default async function PaginaContrato({
         </div>
       </header>
 
+      {aluguel ? (
+        <p role="status" className="rounded-[12px] bg-[#DDF0E7] p-3.5 font-semibold text-[#17533B]">
+          Aluguel alterado a partir de {competenciaParaTexto(aluguel)}.
+        </p>
+      ) : null}
+
       {anexado ? (
         <p role="status" className="rounded-[12px] bg-[#DDF0E7] p-3.5 font-semibold text-[#17533B]">
           Arquivo salvo como versão {anexado}.
@@ -54,7 +65,7 @@ export default async function PaginaContrato({
         <section className="rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(0,35,86,.04),0_8px_24px_rgba(0,35,86,.06)]">
           <h2 className="mb-3 text-[18px] font-bold text-navy">Condições</h2>
           <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-[15px]">
-            <dt className="text-muted">Aluguel</dt>
+            <dt className="text-muted">Aluguel do mês</dt>
             <dd className="tabular-nums">{formatarReais(contrato.aluguelCentavos)}</dd>
             <dt className="text-muted">Situação</dt>
             <dd>{SITUACAO[contrato.situacao] ?? contrato.situacao}</dd>
@@ -88,6 +99,35 @@ export default async function PaginaContrato({
             <p className="text-muted">Nenhum arquivo anexado ainda.</p>
           )}
           <FormularioAnexo contratoId={contrato.id} temArquivo={arquivo !== null} />
+        </section>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
+        <section className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(0,35,86,.04),0_8px_24px_rgba(0,35,86,.06)]">
+          <h2 className="text-[18px] font-bold text-navy">Alterar aluguel</h2>
+          <FormularioAluguel contratoId={contrato.id} mesAtual={mesAtual} />
+        </section>
+
+        <section className="flex flex-col gap-3 rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(0,35,86,.04),0_8px_24px_rgba(0,35,86,.06)]">
+          <h2 className="text-[18px] font-bold text-navy">Histórico de aluguel</h2>
+          {historico.length === 0 ? (
+            <p className="text-muted">Nenhuma alteração. O aluguel é o do contrato desde o início.</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-line">
+              {historico.map((h) => (
+                <li key={h.id} className="flex flex-col gap-0.5 py-2.5">
+                  <span className="font-semibold text-navy">
+                    A partir de {competenciaParaTexto(h.efetivaEm.slice(0, 7))}: {formatarReais(h.novoCentavos)}
+                  </span>
+                  <span className="text-[13px] text-muted">
+                    {h.anteriorCentavos != null ? `Antes: ${formatarReais(h.anteriorCentavos)} · ` : ""}
+                    por {h.feitoPor} em {dataCurta(h.feitoEm)}
+                    {h.observacao ? ` · ${h.observacao}` : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
     </div>
