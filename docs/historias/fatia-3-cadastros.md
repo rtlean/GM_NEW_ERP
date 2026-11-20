@@ -95,7 +95,7 @@ Tamanho: P · Depende de: US-3.5
 
 ## Notas de implementação (US-3.3, branch feat/us-3.3-locatarios)
 - Telas `/locatarios`, `/locatarios/novo` e `/locatarios/[id]/editar`, com busca por nome ou CPF/CNPJ.
-- Cadastro pede nome, CPF/CNPJ (com dígitos verificadores), e-mail, WhatsApp e pelo menos um locador ligado.
+- Cadastro pede nome, CPF/CNPJ (com dígitos verificadores), e-mail e WhatsApp (ver "Layout do design" abaixo: o locador não é pedido no cadastro).
 - Mesmo CPF/CNPJ de outro locatário: aparece "Já existe: <nome>".
 - O vínculo com locadores fica em `tenant_owners` (migração da US-3.3). Um locatário pode ter imóveis de locadores diferentes.
 - Lista mostra os contratos ativos de cada locatário (leitura em `src/lib/contratos.ts`; a tela de contratos é a US-3.5).
@@ -148,3 +148,13 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - Busca e filtro "Sem WhatsApp" saíram da tela, porque o design não os mostra.
 - Mensagem de sucesso com botão Fechar.
 - Sem mudança no banco.
+
+## Notas de implementação (US-3.3, layout do design, branch feat/design-locatarios)
+- Tela `/locatarios` no layout do Claude Design: painel de cadastro acima da lista, lista à esquerda e detalhe à direita. `/locatarios/novo` e `/locatarios/[id]/editar` viraram redirecionamento.
+- Cadastro: nome ou razão social (salvo em maiúsculas), CPF ou CNPJ, RG, e-mail, "Telefone (WhatsApp)" e observações. RG e observações usam as colunas `rg` e `notes` de `tenants`, sem migração.
+- Locador não é pedido no cadastro. O vínculo nasce no contrato (US-3.5). A tela não grava mais `tenant_owners`; vínculos já existentes continuam como estão.
+- Busca por nome ou CPF/CNPJ e filtros "Todos" e "Com mais de um imóvel" (conta contratos ativos).
+- Detalhe: imóveis dos contratos ativos (registro, tipo, locador e aluguel), total "Aluguéis por mês" (soma dos contratos ativos) e "N imóveis · N locadores".
+- Regras: CPF/CNPJ único; nome repetido não cria outro cadastro na inclusão (na edição não é checado); aviso de nomes parecidos (até 2 letras de diferença, sem contar LTDA, S/A, ME, EPP, EIRELI), só como alerta.
+- Na lista, locatário sem contrato ativo mostra "Sem imóvel" (o design mostrava "Novo" para cadastros novos).
+- Leitura de contratos em `src/lib/contratos.ts` e de imóveis em `src/lib/imoveis.ts`.

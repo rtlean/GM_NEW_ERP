@@ -6,21 +6,25 @@ import { obterClienteServidor } from "./supabase/server";
 
 const EMPRESA_ID = 1;
 
-/** Quantos contratos ativos cada locatário tem. Locatário sem contrato não aparece no mapa. */
-export async function contarContratosAtivosPorLocatario(locatarioIds: number[]): Promise<Map<number, number>> {
-  const contagem = new Map<number, number>();
-  if (locatarioIds.length === 0) return contagem;
+export type ContratoAtivo = { propertyId: number; aluguelCentavos: number };
+
+/** Contratos ativos de cada locatário (imóvel e aluguel). Locatário sem contrato ativo não aparece no mapa. */
+export async function contratosAtivosPorLocatario(locatarioIds: number[]): Promise<Map<number, ContratoAtivo[]>> {
+  const mapa = new Map<number, ContratoAtivo[]>();
+  if (locatarioIds.length === 0) return mapa;
 
   const { data, error } = await obterClienteServidor()
     .from("contracts")
-    .select("tenant_id")
+    .select("tenant_id, property_id, rent_cents")
     .eq("company_id", EMPRESA_ID)
     .eq("status", "active")
     .in("tenant_id", locatarioIds);
   if (error) throw new Error("Não foi possível carregar os contratos.");
 
   for (const linha of data ?? []) {
-    contagem.set(linha.tenant_id, (contagem.get(linha.tenant_id) ?? 0) + 1);
+    const lista = mapa.get(linha.tenant_id) ?? [];
+    lista.push({ propertyId: linha.property_id, aluguelCentavos: linha.rent_cents ?? 0 });
+    mapa.set(linha.tenant_id, lista);
   }
-  return contagem;
+  return mapa;
 }

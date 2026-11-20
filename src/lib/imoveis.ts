@@ -58,3 +58,21 @@ export async function listarImoveisDoLocador(ownerId: number): Promise<ImovelLin
     aluguelCentavos: i.rent_cents ?? 0,
   }));
 }
+
+export type ImovelResumo = { codigo: string; tipo: string | null; ownerId: number | null };
+
+/** Código, tipo e locador de cada imóvel pelo id. Imóvel que não existe na empresa não aparece no mapa. */
+export async function imoveisPorIds(ids: number[]): Promise<Map<number, ImovelResumo>> {
+  const mapa = new Map<number, ImovelResumo>();
+  if (ids.length === 0) return mapa;
+
+  const { data, error } = await obterClienteServidor()
+    .from("properties")
+    .select("id, code, type, owner_id")
+    .eq("company_id", EMPRESA_ID)
+    .in("id", ids);
+  if (error) throw new Error("Não foi possível carregar os imóveis.");
+
+  for (const i of data ?? []) mapa.set(i.id, { codigo: i.code, tipo: i.type, ownerId: i.owner_id });
+  return mapa;
+}
