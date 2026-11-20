@@ -98,3 +98,16 @@ export async function listarLocadores(filtros: FiltrosLocadores = {}): Promise<L
     };
   });
 }
+
+export type LocadorParaPainel = { id: number; nome: string; taxaPropria: boolean };
+
+/** Nome e se o locador tem taxa de administração própria, para o painel (Dashboard). Só leitura. */
+export async function listarLocadoresParaPainel(): Promise<LocadorParaPainel[]> {
+  const { data, error } = await obterClienteServidor()
+    .from("owners")
+    .select("id, full_name, admin_fee_percent_basis_points")
+    .eq("company_id", EMPRESA_ID);
+  if (error) throw new Error("Não foi possível carregar os locadores.");
+
+  return (data ?? []).map((o) => ({ id: o.id, nome: o.full_name, taxaPropria: o.admin_fee_percent_basis_points != null }));
+}

@@ -33,3 +33,17 @@ Tamanho: P · Depende de: US-5.2
 - Filtro por competência.
 
 Tamanho: M · Depende de: US-4.3
+
+## Nota de implementação — Dashboard "Carteira" (layout do design, branch feat/dashboard)
+Primeira versão da tela, antes da US-4.3 (mês e cobranças). Os valores vêm só dos cadastros atuais:
+- **Aluguéis cadastrados por mês:** soma do aluguel de todos os contratos ativos. Não é o valor recebido (nota fixa na tela).
+- **Indicadores:** registros de locação (contratos ativos), locadores e registros a revisar (soma dos itens de "O que revisar").
+- **O que revisar:**
+  - Taxa de administração: contratos sem taxa própria e sem taxa no locador; e quantos usam a taxa do locador.
+  - Valores a conferir: aluguel zerado, ou diferente do aluguel cadastrado no imóvel. Não é corrigido automaticamente.
+  - Possíveis duplicidades: locatários com nome parecido (mesma regra do cadastro).
+  - Cadastros incompletos: locatários sem telefone e imóveis sem tipo.
+- **Aluguel por tipo de imóvel:** categorias Kitnet, Apartamento, Casa, Loja e ponto comercial, Sala comercial, Galpão, Garagem, Outro e Não informado. Tipo que não se encaixa vai para "Outro". Barras sem números (valor aparece ao passar o mouse).
+- **Maiores locadores:** top 6 pelo aluguel dos contratos ativos dos imóveis de cada locador.
+
+Regras puras em `src/lib/dashboard-regras.ts` (testadas). Leitura em cada módulo: `listarContratosAtivosParaPainel`, `listarImoveisParaPainel`, `listarLocadoresParaPainel`, `listarLocatariosParaPainel`.
