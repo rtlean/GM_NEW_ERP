@@ -6,6 +6,11 @@ import { usePathname } from "next/navigation";
 import { type GrupoMenu, type ItemMenu, grupoDoCaminho } from "@/lib/menu";
 import { sair } from "@/lib/autenticacao";
 
+// Data de hoje no fuso de Brasília, no formato "20/11" (aparece no botão "Hoje", no lugar do número fictício do design).
+function dataCurta(): string {
+  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date());
+}
+
 // Barra superior do layout do design. Módulos que ainda não existem aparecem como "Em construção".
 export default function TopNav({ menu, atalhos }: { menu: GrupoMenu[]; atalhos: ItemMenu[] }) {
   const caminho = usePathname();
@@ -51,9 +56,13 @@ export default function TopNav({ menu, atalhos }: { menu: GrupoMenu[]; atalhos: 
               className={`flex min-h-11 shrink-0 items-center rounded-full border px-4 font-semibold ${ativo ? "border-navy text-navy" : "border-[#D8DEE9] text-muted"}`}
             >
               {a.rotulo}
+              {a.rota === "hoje" ? <span className="ml-1.5 font-normal text-muted">{dataCurta()}</span> : null}
             </Link>
           );
         })}
+        <Link href="/trocar-senha?voluntaria=1" aria-current={caminho === "/trocar-senha" ? "page" : undefined} className="flex min-h-11 shrink-0 items-center px-1.5 font-semibold text-navy">
+          Minha senha
+        </Link>
         <form action={sair}>
           <button type="submit" className="flex min-h-11 items-center px-1.5 font-semibold text-navy">
             Sair
