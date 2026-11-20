@@ -46,6 +46,6 @@ Login/usuários, Locadores, Locatários, Imóveis, Contratos, Lançamentos, Rela
 ## Regras de negócio
 - Imóvel pertence a um locador. Locatário é único por CPF/CNPJ e pode ter contratos com vários locadores.
 - Alteração de aluguel vale para o **mês inteiro** escolhido: sem proporcional, sem retroativo (decisão de 18/11/2026).
-- Taxa de administração padrão 10% sobre aluguel pago (editável por contrato até o dono decidir).
+- Taxa de administração padrão 10% sobre aluguel pago, editável por locador (decisão do dono, 20/11/2026). Taxa incide só sobre o aluguel, não sobre multa nem seguro.
 - Despesas "cobrar de locador" são descontadas no relatório mensal.
 - Perfis: `admin` (tudo) e `user` = operacional (sem usuários, sem excluir), de `users.role`.

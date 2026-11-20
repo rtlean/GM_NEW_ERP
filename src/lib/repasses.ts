@@ -16,6 +16,7 @@ export type LinhaRepasse = {
   ownerId: number;
   nome: string;
   recebidoCentavos: number;
+  aluguelPagoCentavos: number;
   taxaCentavos: number;
   taxaBps: number;
   despesasCentavos: number;
@@ -35,14 +36,15 @@ export async function listarRepasses(competencia: string): Promise<LinhaRepasse[
 
   return locadores
     .map((l) => {
-      const rec = recebido.get(l.id) ?? 0;
+      const rec = recebido.get(l.id) ?? { totalCentavos: 0, aluguelCentavos: 0 };
       const desp = despesas.get(l.id) ?? 0;
-      const conta = calcularRepasse({ recebidoCentavos: rec, taxaBps: l.taxaBps, despesasCentavos: desp });
+      const conta = calcularRepasse({ recebidoCentavos: rec.totalCentavos, aluguelPagoCentavos: rec.aluguelCentavos, taxaBps: l.taxaBps, despesasCentavos: desp });
       const feito = liberados.get(l.id);
       return {
         ownerId: l.id,
         nome: l.nome,
-        recebidoCentavos: rec,
+        recebidoCentavos: rec.totalCentavos,
+        aluguelPagoCentavos: rec.aluguelCentavos,
         taxaCentavos: conta.taxaCentavos,
         taxaBps: conta.taxaBps,
         despesasCentavos: desp,
@@ -84,7 +86,7 @@ export async function liberarRepasse(params: { ownerId: number; competencia: str
     ? { repasseCentavos: linha.repasseCentavos, taxaCentavos: linha.taxaCentavos }
     : (() => {
         const l = locadores.find((x) => x.id === ownerId)!;
-        return calcularRepasse({ recebidoCentavos: 0, taxaBps: l.taxaBps, despesasCentavos: 0 });
+        return calcularRepasse({ recebidoCentavos: 0, aluguelPagoCentavos: 0, taxaBps: l.taxaBps, despesasCentavos: 0 });
       })();
   const jaLiberado = linha?.liberadoEm != null;
   const pode = podeLiberar(calc.repasseCentavos, jaLiberado);

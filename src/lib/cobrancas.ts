@@ -100,18 +100,25 @@ function linhaDaCobranca(c: CobrancaPlanejada, usuarioId: number) {
   };
 }
 
-/** Aluguel recebido por locador na competência (soma de paid_cents). Só leitura, para o módulo de Repasses. */
-export async function recebidoPorLocador(competencia: string): Promise<Map<number, number>> {
+/**
+ * Recebido por locador na competência: total pago e a parte que é aluguel.
+ * Aluguel pago = min(pago, aluguel da cobrança): assume que o pagamento cobre o aluguel antes de multa e seguro.
+ * Só leitura, para o módulo de Repasses.
+ */
+export async function recebidoPorLocador(competencia: string): Promise<Map<number, { totalCentavos: number; aluguelCentavos: number }>> {
   const { data, error } = await obterClienteServidor()
     .from("monthly_entries")
-    .select("owner_id, paid_cents")
+    .select("owner_id, paid_cents, rent_cents")
     .eq("company_id", EMPRESA_ID)
     .eq("competence", competencia);
   if (error) throw new Error("Não foi possível carregar os recebimentos do mês.");
-  const mapa = new Map<number, number>();
+  const mapa = new Map<number, { totalCentavos: number; aluguelCentavos: number }>();
   for (const linha of data ?? []) {
     if (linha.owner_id == null) continue;
-    mapa.set(linha.owner_id, (mapa.get(linha.owner_id) ?? 0) + linha.paid_cents);
+    const atual = mapa.get(linha.owner_id) ?? { totalCentavos: 0, aluguelCentavos: 0 };
+    atual.totalCentavos += linha.paid_cents;
+    atual.aluguelCentavos += Math.min(linha.paid_cents, linha.rent_cents);
+    mapa.set(linha.owner_id, atual);
   }
   return mapa;
 }
