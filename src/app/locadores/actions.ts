@@ -30,7 +30,6 @@ function lerEntrada(formData: FormData): EntradaLocador {
     codigoBanco: texto("codigoBanco"),
     agencia: texto("agencia"),
     conta: texto("conta"),
-    digitoConta: texto("digitoConta"),
     tipoConta: texto("tipoConta"),
   };
 }
@@ -55,5 +54,5 @@ export async function salvarLocadorAction(_anterior: EstadoLocador | undefined, 
   }
 
   revalidatePath("/locadores");
-  redirect(`/locadores?id=${gravadoId}`);
+  redirect(`/locadores?id=${gravadoId}&salvo=${id ? "editado" : "criado"}`);
 }
