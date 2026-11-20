@@ -58,3 +58,13 @@ Tamanho: M · Depende de: US-3.2
 - ⚠️ Confirmar regra de arredondamento com o modelo antigo (Locatelli 11/2026).
 
 Tamanho: P · Depende de: US-4.2
+
+## US-4.6 Reajuste pelo índice (entregue em feat/us-4.6-reajustes)
+**Como** secretária **quero** agendar o reajuste anual do aluguel **para** aplicar o índice no aniversário do contrato.
+- Tela **Reajustes**: contratos ativos com aniversário nos próximos 60 dias. Cada linha tem índice, percentual, valor atual e novo valor.
+- O novo valor é o atual × (1 + percentual), arredondado para o centavo. Vale a partir do aniversário, para o mês inteiro, sem retroativo.
+- Grava pela alteração de aluguel (US-3.7): linha nova em `contract_rent_changes`, com observação "Reajuste IPCA 4,50%". Nada é apagado.
+- Não aplica duas vezes: se já existe reajuste daquele contrato na mesma data, recusa.
+- Auditoria: a alteração de aluguel já registra `contract.rent_changed`.
+
+Fora desta história: renovações com aditivo (US-4.7, gerar o aditivo em PDF com o logotipo, envio manual).

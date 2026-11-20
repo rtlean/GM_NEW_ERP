@@ -240,3 +240,24 @@ export async function listarContratosAtivosNaCompetencia(competencia: string): P
   const noMes = await aluguelNoMesPorContrato(linhas, competencia);
   return linhas.map((c) => ({ id: c.id, tenantId: c.tenant_id, propertyId: c.property_id, aluguelCentavos: noMes.get(c.id) ?? 0 }));
 }
+
+/** Contratos ativos com o dado que o Reajuste precisa (US-4.6). */
+export async function listarContratosParaReajuste(): Promise<
+  { id: number; tenantId: number; propertyId: number; startDate: string; rentCents: number; adjustmentIndex: string | null }[]
+> {
+  const { data, error } = await obterClienteServidor()
+    .from("contracts")
+    .select("id, tenant_id, property_id, start_date, rent_cents, adjustment_index")
+    .eq("company_id", EMPRESA_ID)
+    .eq("status", "active")
+    .order("id", { ascending: true });
+  if (error) throw new Error("Não foi possível carregar os contratos.");
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    tenantId: c.tenant_id,
+    propertyId: c.property_id,
+    startDate: c.start_date,
+    rentCents: c.rent_cents,
+    adjustmentIndex: c.adjustment_index,
+  }));
+}
