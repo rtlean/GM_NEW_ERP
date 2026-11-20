@@ -24,7 +24,7 @@ O sistema antigo **continua em uso** sobre essas tabelas. Consequências:
 | mês | `monthly_entries` | contract_id, competence (`AAAA-MM`), due_date, payment_date, status, rent_cents, paid_cents, pending_cents, encargos | 223 |
 | lançamentos | `monthly_expense_items` | competence, owner_id, property_id, description, amount_cents, charged_to | 95 |
 
-Cobranças do mês (US-4.1, sem migração): `monthly_entries` recebe uma linha por contrato ativo e competência (`status` `open`, `rent_cents`, `pending_cents`, `due_date` dia 10). Já existem linhas de 2026-09 a 2026-11 do sistema antigo; a geração não as altera. Não há trava única por contrato + competência no banco.
+Cobranças do mês (US-4.1, sem migração): `monthly_entries` recebe uma linha por contrato ativo e competência (`status` `open`, `rent_cents`, `pending_cents`, `due_date` dia 10). Já existem linhas de 2026-09 a 2026-11 do sistema antigo; a geração não as altera. Trava única por contrato + competência já existe (`monthly_entries_contract_competence_uq`); a geração ignora duplicata sem erro.
 
 Lançamentos do locador (US-4.4, sem migração): categoria em `control_account_id` (contas de `controles_conta` ativas), data em `expense_date`, observação em `notes`, quem lançou em `created_by`. `charged_to` aceita `owner` ou `tenant` (o banco não tem "imobiliária"). Sem exclusão: corrigir é editar.
 | relatórios | `generated_reports`, `report_notes`, `report_exclusions`, `competence_closures` | — | 234 / 6 / 1 / 4 |
