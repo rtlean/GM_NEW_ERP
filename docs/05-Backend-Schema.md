@@ -53,3 +53,11 @@ Aluguel da competência M = `rent_cents` da última `contract_rent_changes` com 
 - `properties.numero`, `complemento`, `bairro`, `caracteristicas` (novas, texto, opcionais). Os 90 imóveis continuam os mesmos; as colunas ficam vazias até o cadastro preencher.
 - `properties.address` continua guardando o endereço (logradouro).
 - Testada numa transação com ROLLBACK antes de aplicar.
+
+## Migração 2026-11-20: detalhes do imóvel (design)
+
+Arquivo: `supabase/migrations/20261120090000_properties_detalhes_design_imoveis.sql`. Aditiva, aplicada em produção com aprovação do dono.
+
+- `occupancy_status`: novo valor `sold` (Vendido).
+- `properties`: `name`, `finality`, `matricula`, `iptu_registration`, `bedrooms`, `suites`, `bathrooms`, `parking_spots`, `useful_area_m2`, `total_area_m2`, `floor`, `furnishing`, `pets_allowed`, `sale_value_cents`, `condominium_cents`, `iptu_cents`, `amenities` (text[]).
+- Valores monetários em centavos (inteiro). Áreas em m² (numeric 10,2).

@@ -125,3 +125,13 @@ Motivo: o dono pediu que as telas sigam o layout do Claude Design (regra do proj
 
 Ainda fora (dependem de migração aditiva **não aprovada** para produção): nome de identificação, finalidade, situação "Vendido", matrícula, inscrição do IPTU, quartos, suítes, banheiros, vagas, áreas, andar, mobília, pets, valor de venda, condomínio, IPTU e comodidades. Número, cidade e UF continuam, por decisão do dono.
 Taxa de administração: continua flexível por locador (decisão do dono), sem padronizar.
+
+## Ajuste de layout: campos do imóvel (PR 2, branch `fix/design-imoveis-campos`)
+
+- Migração aditiva `20261120090000_properties_detalhes_design_imoveis.sql`, aplicada em produção com aprovação do dono (20/11/2026). Cria 17 colunas em `properties` e a situação `sold` ("Vendido"). Nenhuma coluna existente foi alterada ou apagada.
+- Campos do design ligados ao formulário: nome de identificação, finalidade, matrícula, inscrição do IPTU, quartos, suítes, banheiros, vagas, áreas, andar, mobília, aceita pets, comodidades, valor de venda, condomínio e IPTU.
+- Número, complemento, cidade e UF continuam (decisão do dono).
+- "Cadastro X% completo" conta os 12 campos da lista do design.
+- A coluna antiga `caracteristicas` não é mais gravada pelo formulário. O texto que já existir continua no banco e não aparece na tela.
+- Comodidades usam os 12 itens do design. "Adicionar fotos" aparece desabilitado: fotos ficam para uma etapa futura.
+- Taxa de administração segue flexível por locador (decisão do dono).

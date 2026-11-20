@@ -1,65 +1,37 @@
 import "server-only";
 import { obterClienteServidor } from "./supabase/server";
 import { listarOpcoesDeLocador } from "./locadores-cadastro";
-import type { DadosImovel } from "./cadastro-imovel";
+import type { DadosImovel, LinhaImovel } from "./cadastro-imovel";
 
-// Cadastro e leitura de imóveis (US-3.4). Toda consulta filtra company_id = 1.
+// Cadastro e leitura de imóveis (US-3.4 e ajuste de layout). Toda consulta filtra company_id = 1.
 // Não apaga imóveis. Código novo = próximo número da sequência (0001, 0002, ...).
 
 const EMPRESA_ID = 1;
 
-export type ImovelLista = {
-  id: number;
-  codigo: string;
-  tipo: string | null;
-  endereco: string;
-  cep: string | null;
-  bairro: string | null;
-  cidade: string;
-  uf: string;
-  aluguelCentavos: number;
-  situacao: string;
-  locadorId: number | null;
-  locadorNome: string;
-};
-
-export type FiltrosImoveis = { busca?: string; locadorId?: number; tipo?: string };
+export type ImovelLista = LinhaImovel & { id: number; code: string; locadorNome: string };
 
 const CAMPOS =
-  "id, code, type, address, numero, complemento, bairro, zip_code, city, state, rent_cents, occupancy_status, owner_id, caracteristicas";
+  "id, code, name, type, finality, occupancy_status, zip_code, address, numero, complemento, bairro, city, state, matricula, iptu_registration, bedrooms, suites, bathrooms, parking_spots, useful_area_m2, total_area_m2, floor, furnishing, pets_allowed, amenities, rent_cents, sale_value_cents, condominium_cents, iptu_cents, owner_id";
 
-export async function listarImoveis(filtros: FiltrosImoveis = {}): Promise<ImovelLista[]> {
-  let consulta = obterClienteServidor()
+/** Lista todos os imóveis da empresa (ordenados por código). A busca é feita na tela, com poucos registros. */
+export async function listarImoveis(): Promise<ImovelLista[]> {
+  const { data, error } = await obterClienteServidor()
     .from("properties")
     .select(CAMPOS)
     .eq("company_id", EMPRESA_ID)
     .order("code", { ascending: true });
-  if (filtros.locadorId) consulta = consulta.eq("owner_id", filtros.locadorId);
-  if (filtros.tipo) consulta = consulta.eq("type", filtros.tipo);
-  const termo = (filtros.busca ?? "").trim().replace(/[,()%*]/g, "");
-  if (termo) consulta = consulta.or(`address.ilike.%${termo}%,bairro.ilike.%${termo}%,code.ilike.%${termo}%`);
-
-  const { data, error } = await consulta;
   if (error) throw new Error("Não foi possível carregar os imóveis.");
 
   const locadores = new Map((await listarOpcoesDeLocador()).map((o) => [o.id, o.nome]));
   return (data ?? []).map((i) => ({
+    ...(i as unknown as LinhaImovel),
     id: i.id,
-    codigo: i.code,
-    tipo: i.type,
-    endereco: i.address,
-    cep: i.zip_code,
-    bairro: i.bairro,
-    cidade: i.city,
-    uf: i.state,
-    aluguelCentavos: i.rent_cents,
-    situacao: i.occupancy_status,
-    locadorId: i.owner_id,
+    code: i.code,
     locadorNome: i.owner_id ? (locadores.get(i.owner_id) ?? "Locador") : "Sem locador",
   }));
 }
 
-export async function buscarImovel(id: number) {
+export async function buscarImovel(id: number): Promise<(LinhaImovel & { id: number; code: string }) | null> {
   const { data, error } = await obterClienteServidor()
     .from("properties")
     .select(CAMPOS)
@@ -67,7 +39,7 @@ export async function buscarImovel(id: number) {
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error("Não foi possível carregar o imóvel.");
-  return data;
+  return data ? { ...(data as unknown as LinhaImovel), id: data.id, code: data.code } : null;
 }
 
 /** Próximo código da sequência: maior código numérico + 1, com 4 dígitos. */

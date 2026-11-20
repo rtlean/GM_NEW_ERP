@@ -22,20 +22,39 @@ export async function salvarImovelAction(_anterior: EstadoImovel | undefined, fo
 
   const texto = (campo: string) => String(formData.get(campo) ?? "");
   const situacaoAtual = texto("situacaoAtual") || undefined;
-  const resultado = validarImovel({
-    ownerId: texto("ownerId"),
-    tipo: texto("tipo"),
-    situacao: texto("situacao"),
-    endereco: texto("endereco"),
-    numero: texto("numero"),
-    complemento: texto("complemento"),
-    bairro: texto("bairro"),
-    cep: texto("cep"),
-    cidade: texto("cidade"),
-    uf: texto("uf"),
-    aluguel: texto("aluguel"),
-    caracteristicas: texto("caracteristicas"),
-  }, situacaoAtual);
+  const resultado = validarImovel(
+    {
+      ownerId: texto("ownerId"),
+      nome: texto("nome"),
+      tipo: texto("tipo"),
+      finalidade: texto("finalidade"),
+      situacao: texto("situacao"),
+      cep: texto("cep"),
+      endereco: texto("endereco"),
+      numero: texto("numero"),
+      complemento: texto("complemento"),
+      bairro: texto("bairro"),
+      cidade: texto("cidade"),
+      uf: texto("uf"),
+      matricula: texto("matricula"),
+      inscricaoIptu: texto("inscricaoIptu"),
+      quartos: texto("quartos"),
+      suites: texto("suites"),
+      banheiros: texto("banheiros"),
+      vagas: texto("vagas"),
+      areaUtil: texto("areaUtil"),
+      areaTotal: texto("areaTotal"),
+      andar: texto("andar"),
+      mobilia: texto("mobilia"),
+      pets: texto("pets"),
+      comodidades: formData.getAll("comodidades").map(String),
+      aluguel: texto("aluguel"),
+      valorVenda: texto("valorVenda"),
+      condominio: texto("condominio"),
+      iptu: texto("iptu"),
+    },
+    situacaoAtual,
+  );
   if (!resultado.ok) return { erros: resultado.erros };
 
   let gravadoId: number;

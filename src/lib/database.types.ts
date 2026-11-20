@@ -1730,6 +1730,23 @@ export type Database = {
           caracteristicas: string | null
           complemento: string | null
           numero: string | null
+          amenities: string[] | null
+          bathrooms: number | null
+          bedrooms: number | null
+          condominium_cents: number | null
+          finality: string | null
+          floor: string | null
+          furnishing: string | null
+          iptu_cents: number | null
+          iptu_registration: string | null
+          matricula: string | null
+          name: string | null
+          parking_spots: number | null
+          pets_allowed: string | null
+          sale_value_cents: number | null
+          suites: number | null
+          total_area_m2: number | null
+          useful_area_m2: number | null
           owner_id: number | null
           rent_cents: number
           state: string
@@ -1749,6 +1766,23 @@ export type Database = {
           caracteristicas?: string | null
           complemento?: string | null
           numero?: string | null
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          condominium_cents?: number | null
+          finality?: string | null
+          floor?: string | null
+          furnishing?: string | null
+          iptu_cents?: number | null
+          iptu_registration?: string | null
+          matricula?: string | null
+          name?: string | null
+          parking_spots?: number | null
+          pets_allowed?: string | null
+          sale_value_cents?: number | null
+          suites?: number | null
+          total_area_m2?: number | null
+          useful_area_m2?: number | null
           owner_id?: number | null
           rent_cents?: number
           state: string
@@ -1768,6 +1802,23 @@ export type Database = {
           caracteristicas?: string | null
           complemento?: string | null
           numero?: string | null
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          condominium_cents?: number | null
+          finality?: string | null
+          floor?: string | null
+          furnishing?: string | null
+          iptu_cents?: number | null
+          iptu_registration?: string | null
+          matricula?: string | null
+          name?: string | null
+          parking_spots?: number | null
+          pets_allowed?: string | null
+          sale_value_cents?: number | null
+          suites?: number | null
+          total_area_m2?: number | null
+          useful_area_m2?: number | null
           owner_id?: number | null
           rent_cents?: number
           state?: string
@@ -2162,7 +2213,7 @@ export type Database = {
       contract_status: "active" | "ended" | "draft"
       entry_status: "paid" | "open" | "overdue" | "partial" | "cancelled"
       membership_status: "active" | "inactive"
-      occupancy_status: "occupied" | "vacant" | "maintenance"
+      occupancy_status: "occupied" | "vacant" | "maintenance" | "sold"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -2296,7 +2347,7 @@ export const Constants = {
       contract_status: ["active", "ended", "draft"],
       entry_status: ["paid", "open", "overdue", "partial", "cancelled"],
       membership_status: ["active", "inactive"],
-      occupancy_status: ["occupied", "vacant", "maintenance"],
+      occupancy_status: ["occupied", "vacant", "maintenance", "sold"],
       user_role: ["user", "admin"],
     },
   },
