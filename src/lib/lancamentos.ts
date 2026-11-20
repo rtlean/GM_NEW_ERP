@@ -147,3 +147,20 @@ export async function contarLancamentosPorLocador(competencia: string): Promise<
   for (const l of data ?? []) mapa.set(l.owner_id, (mapa.get(l.owner_id) ?? 0) + 1);
   return mapa;
 }
+
+/** Despesas que o locador paga (charged_to = owner) por locador na competência. Só leitura, para Repasses. */
+export async function despesasCobraDoLocadorPorLocador(competencia: string): Promise<Map<number, number>> {
+  const { data, error } = await obterClienteServidor()
+    .from("monthly_expense_items")
+    .select("owner_id, amount_cents")
+    .eq("company_id", EMPRESA_ID)
+    .eq("competence", competencia)
+    .eq("charged_to", "owner");
+  if (error) throw new Error("Não foi possível carregar as despesas do mês.");
+  const mapa = new Map<number, number>();
+  for (const linha of data ?? []) {
+    if (linha.owner_id == null) continue;
+    mapa.set(linha.owner_id, (mapa.get(linha.owner_id) ?? 0) + linha.amount_cents);
+  }
+  return mapa;
+}

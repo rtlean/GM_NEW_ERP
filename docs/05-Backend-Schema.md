@@ -26,6 +26,8 @@ O sistema antigo **continua em uso** sobre essas tabelas. Consequências:
 
 Cobranças do mês (US-4.1, sem migração): `monthly_entries` recebe uma linha por contrato ativo e competência (`status` `open`, `rent_cents`, `pending_cents`, `due_date` dia 10). Já existem linhas de 2026-09 a 2026-11 do sistema antigo; a geração não as altera. Trava única por contrato + competência já existe (`monthly_entries_contract_competence_uq`); a geração ignora duplicata sem erro.
 
+Repasse manual (US-4.8): grava em `owner_repasses` com `admin_fee_cents` (migração aditiva `20261120160000`). Recebido vem de `monthly_entries.paid_cents`; despesas de `monthly_expense_items` com `charged_to = owner`. Os 51 repasses antigos de out/nov 2026 não são alterados.
+
 Aditivo de reajuste em PDF (US-4.7, sem migração): gera PDF com `pdf-lib` e grava em `contract_documents` como nova versão (`file_name` "Aditivo reajuste AAAA-MM-DD.pdf"). Lê o reajuste de `contract_rent_changes`. Auditoria `contract.addendum_generated`.
 
 Reajuste pelo índice (US-4.6, sem migração): grava em `contract_rent_changes` com observação `Reajuste <índice> <percentual>%`. Usa `contracts.adjustment_index` e o dia do início do contrato.
@@ -34,7 +36,7 @@ Lançamentos do locador (US-4.4, sem migração): categoria em `control_account_
 | relatórios | `generated_reports`, `report_notes`, `report_exclusions`, `competence_closures` | — | 234 / 6 / 1 / 4 |
 | auditoria | `audit_events` | — | 2770 |
 
-Tabelas fora da v1 (não mexer): `financial_ledger_entries`, `expense_allocations`, `owner_repasses`, `owner_repass_methods`, `controles_conta`, `descontos_acrescimos*`, `tenant_debts*`, `pendency_receipts`, `dashboard_action_items`, `contract_document_analyses`, `contract_divergences`, `brand_settings`, `company_settings*`, `contratos` (vazia, legado).
+Tabelas fora da v1 (não mexer): `financial_ledger_entries`, `expense_allocations`, `owner_repass_methods`, `controles_conta`, `descontos_acrescimos*`, `tenant_debts*`, `pendency_receipts`, `dashboard_action_items`, `contract_document_analyses`, `contract_divergences`, `brand_settings`, `company_settings*`, `contratos` (vazia, legado).
 
 ## 3. Pontos de atenção
 | # | Ponto | Tratamento |
