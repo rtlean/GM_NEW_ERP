@@ -34,6 +34,14 @@ Tamanho: P · Depende de: US-4.1
 
 Tamanho: M · Depende de: US-3.2
 
+**Entregue (feat/lancamentos-locador)** — decisões do dono:
+- Categoria obrigatória, vinda das contas de controle ativas (`controles_conta`, `ativo = true`), gravada em `control_account_id`.
+- Imóvel opcional no lugar de contrato ("Geral do locador" quando vazio). O imóvel tem de ser do próprio locador.
+- Sem exclusão nesta etapa: corrigir é editar. Auditoria `expense.created` / `expense.updated`.
+- "Cobrar de": locador ou locatário. "Imobiliária" do design **não** entra (o banco não aceita esse valor).
+- Prévia para o relatório (aluguéis dos imóveis, despesas cobradas do locador, saldo antes da taxa), como no design. O PDF do relatório fica para a fatia 5.
+- Cobranças do mês (US-4.1 a 4.3) continuam fora desta entrega.
+
 ## US-4.5 Calcular taxa de administração
 **Como** dono **quero** a taxa calculada automaticamente **para** não errar contas.
 - Taxa = valor pago × `taxa_bp` / 10000, arredondada ao centavo (meio para cima).
