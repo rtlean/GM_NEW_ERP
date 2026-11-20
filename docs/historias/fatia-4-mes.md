@@ -92,3 +92,23 @@ Fora desta história: renovações com aditivo (envio para assinatura, tela "Ren
 - Auditoria: `repass.released`.
 - Migração aditiva: `20261120160000_owner_repasses_taxa.sql` (coluna `admin_fee_cents`, aceita vazio), aplicada em produção depois de teste em transação desfeita.
 
+
+## US-4.9 Faturamento em lote (tela /faturamento, design `Faturamento.dc.html`)
+**Como** secretária **quero** escolher os contratos do mês e gerar as cobranças de uma vez **para** conferir o total antes de gerar.
+- Uma linha por contrato ativo: caixa de seleção, contrato, inquilino, vencimento, valor e situação.
+- Total e quantidade atualizam conforme a seleção ("N de M selecionadas").
+- Botão "Gerar cobranças" (decisão do dono, 20/11/2026: não "Emitir faturas", porque NFS-e está fora da v1). Gera só as linhas marcadas.
+- Reaproveita a regra da US-4.1 (`gerarCobrancasDoMes`): vencimento dia 10, não duplica contrato + competência, não altera cobrança existente, auditoria `charges.generated`.
+- Ajuste aditivo: `gerarCobrancasDoMes` aceita lista opcional de contratos. Sem lista, a US-4.1 continua igual.
+- Após gerar: "N cobranças geradas" e link "Acompanhar cobrança" (para /cobranca). "Voltar à prévia" só limpa a tela, não apaga nada.
+- Situação da linha: "Pronta", "Falta e-mail de cobrança", "Inquilino em atraso".
+- **Bloqueio (decisão do dono, 20/11/2026):** contrato cujo inquilino não tem e-mail de cobrança cadastrado não pode ser gerado. A caixa fica desabilitada e a linha começa desmarcada.
+- Permissão: tela `faturamento` (já existe em `permissoes.ts`).
+
+Critérios:
+- Dado 6 contratos ativos e 5 marcados, quando clico "Gerar", então são criadas 5 cobranças e a 6ª não existe.
+- Dado que gero de novo o mesmo mês, então nada é duplicado (resumo mostra "já existentes").
+- Dado nenhuma linha marcada, então o botão fica desabilitado.
+- Dado contrato sem e-mail do inquilino, então a linha não pode ser marcada.
+
+Tamanho: M · Depende de: US-4.1 (entregue)
