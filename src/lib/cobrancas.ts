@@ -157,3 +157,40 @@ export async function inquilinosEmAtrasoAte(competencia: string): Promise<Set<nu
   if (error) throw new Error("Não foi possível verificar os atrasos.");
   return new Set((data ?? []).map((e) => e.tenant_id as number));
 }
+
+/** Cobranças de um locador na competência, para o Relatório mensal (US-5.1). Só leitura. */
+export type CobrancaDoLocador = {
+  contratoId: number;
+  tenantId: number | null;
+  propertyId: number | null;
+  aluguelCentavos: number;
+  pagoCentavos: number;
+  pendenciaCentavos: number;
+  multaCentavos: number;
+  vencimento: string | null;
+  dataPagamento: string | null;
+  status: "paid" | "open" | "overdue" | "partial" | "cancelled";
+};
+
+export async function cobrancasDoLocadorNaCompetencia(ownerId: number, competencia: string): Promise<CobrancaDoLocador[]> {
+  const { data, error } = await obterClienteServidor()
+    .from("monthly_entries")
+    .select("contract_id, tenant_id, property_id, rent_cents, paid_cents, pending_cents, fine_cents, due_date, payment_date, status")
+    .eq("company_id", EMPRESA_ID)
+    .eq("competence", competencia)
+    .eq("owner_id", ownerId)
+    .order("contract_id", { ascending: true });
+  if (error) throw new Error("Não foi possível carregar as cobranças do locador.");
+  return (data ?? []).map((c) => ({
+    contratoId: c.contract_id as number,
+    tenantId: c.tenant_id,
+    propertyId: c.property_id,
+    aluguelCentavos: c.rent_cents,
+    pagoCentavos: c.paid_cents,
+    pendenciaCentavos: c.pending_cents,
+    multaCentavos: c.fine_cents,
+    vencimento: c.due_date,
+    dataPagamento: c.payment_date,
+    status: c.status,
+  }));
+}
