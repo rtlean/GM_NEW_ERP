@@ -1534,6 +1534,7 @@ export type Database = {
       }
       owner_repasses: {
         Row: {
+          admin_fee_cents: number | null
           account_snapshot: string | null
           account_type_snapshot: string | null
           agency_snapshot: string | null
@@ -1555,6 +1556,7 @@ export type Database = {
           repass_method: string | null
         }
         Insert: {
+          admin_fee_cents?: number | null
           account_snapshot?: string | null
           account_type_snapshot?: string | null
           agency_snapshot?: string | null
@@ -1576,6 +1578,7 @@ export type Database = {
           repass_method?: string | null
         }
         Update: {
+          admin_fee_cents?: number | null
           account_snapshot?: string | null
           account_type_snapshot?: string | null
           agency_snapshot?: string | null

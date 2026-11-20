@@ -99,3 +99,19 @@ function linhaDaCobranca(c: CobrancaPlanejada, usuarioId: number) {
     created_by: usuarioId,
   };
 }
+
+/** Aluguel recebido por locador na competência (soma de paid_cents). Só leitura, para o módulo de Repasses. */
+export async function recebidoPorLocador(competencia: string): Promise<Map<number, number>> {
+  const { data, error } = await obterClienteServidor()
+    .from("monthly_entries")
+    .select("owner_id, paid_cents")
+    .eq("company_id", EMPRESA_ID)
+    .eq("competence", competencia);
+  if (error) throw new Error("Não foi possível carregar os recebimentos do mês.");
+  const mapa = new Map<number, number>();
+  for (const linha of data ?? []) {
+    if (linha.owner_id == null) continue;
+    mapa.set(linha.owner_id, (mapa.get(linha.owner_id) ?? 0) + linha.paid_cents);
+  }
+  return mapa;
+}

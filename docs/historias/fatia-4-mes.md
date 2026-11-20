@@ -79,3 +79,16 @@ Fora desta história: renovações com aditivo (envio para assinatura, tela "Ren
 - Auditoria: `contract.addendum_generated`.
 - Sem migração: usa as tabelas existentes. Dependência nova: `pdf-lib`.
 - Efeito colateral: o aditivo passa a ser a versão atual do arquivo do contrato (a maior versão). Ver a PR.
+
+## US-4.8 Repasses manuais ao locador (em feat/us-4.8-repasses)
+**Como** secretária **quero** liberar o repasse de cada locador **para** registrar o que foi pago, sem fazer o Pix pelo sistema.
+- Tela **Repasses** por competência. Para cada locador: recebido (aluguel pago), taxa, despesas cobradas do locador e repasse líquido.
+- Taxa padrão 10%; se o locador tiver taxa própria no cadastro, ela vale.
+- Repasse = recebido − taxa − despesas cobradas do locador (mesma regra do relatório mensal).
+- **Liberar** grava em `owner_repasses`: data, valor, taxa (coluna nova `admin_fee_cents`) e os dados bancários e Pix do locador no momento.
+- Um repasse por locador e competência. Não libera se já existe repasse, nem se o valor for zero ou negativo.
+- Repasses antigos (51 linhas de outubro e novembro/2026, vindas do sistema antigo) ficam como estão, sem alteração. Foram erros de digitação do sistema antigo, e a tela os mostra como "Liberado em…".
+- Sem Pix, TED nem repasse automático.
+- Auditoria: `repass.released`.
+- Migração aditiva: `20261120160000_owner_repasses_taxa.sql` (coluna `admin_fee_cents`, aceita vazio), aplicada em produção depois de teste em transação desfeita.
+
