@@ -135,3 +135,16 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - A coluna antiga `caracteristicas` não é mais gravada pelo formulário. O texto que já existir continua no banco e não aparece na tela.
 - Comodidades usam os 12 itens do design. "Adicionar fotos" aparece desabilitado: fotos ficam para uma etapa futura.
 - Taxa de administração segue flexível por locador (decisão do dono).
+
+## Ajuste de layout: tela de Locadores (branch `feat/design-locadores`)
+
+- Cadastro em painel acima da lista (`/locadores?novo=1` e `/locadores?id=N&editar=1`). As páginas separadas viraram redirecionamento.
+- Campos do design: nome ou razão social, CPF ou CNPJ, e-mail, telefone, cidade e taxa de administração (padrão 10%). A taxa continua flexível por locador (decisão do dono).
+- Forma de repasse "Pix" ou "Conta bancária". Chave Pix com tipos CPF, CNPJ, E-mail, Telefone e Aleatória.
+- Conta bancária: banco, agência e "Conta com dígito" (ex.: 12345-6). Código do banco e tipo de conta não aparecem na tela, mas são preservados ao editar.
+- Lista ordenada pelo total de aluguel (maior primeiro), com a contagem "N locadores cadastrados".
+- Detalhe: taxa, forma de repasse e cidade; botões "Editar dados" e "Novo contrato"; imóveis com o aluguel de cada um.
+- Campo do locatário em cada imóvel aparece como "a definir no contrato (US-3.5)", porque o vínculo ainda não existe.
+- Busca e filtro "Sem WhatsApp" saíram da tela, porque o design não os mostra.
+- Mensagem de sucesso com botão Fechar.
+- Sem mudança no banco.

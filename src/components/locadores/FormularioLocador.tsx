@@ -3,27 +3,19 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { salvarLocadorAction, type EstadoLocador } from "@/app/locadores/actions";
-import { TIPOS_DE_CONTA, TIPOS_DE_PIX, type EntradaLocador } from "@/lib/cadastro-locador";
+import { ROTULO_FORMA_DE_REPASSE, ROTULO_TIPO_DE_PIX, TIPOS_DE_PIX, type EntradaLocador } from "@/lib/cadastro-locador";
 
-type Props = { inicial: EntradaLocador; id?: number };
+type Props = { inicial: EntradaLocador; id?: number; titulo: string };
 
-function Campo({
-  rotulo,
-  nome,
-  erro,
-  children,
-}: {
-  rotulo: string;
-  nome: string;
-  erro?: string;
-  children: React.ReactNode;
-}) {
+const entrada = "min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3 text-[#0E1B33]";
+
+function Campo({ rotulo, erro, children }: { rotulo: string; erro?: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="font-semibold text-muted">{rotulo}</span>
+    <label className="flex flex-col gap-1 font-semibold">
+      <span className="text-[#0E1B33]">{rotulo}</span>
       {children}
       {erro ? (
-        <span id={`erro-${nome}`} role="alert" className="text-sm font-semibold text-red-800">
+        <span role="alert" className="text-sm font-semibold text-[#8A1C1C]">
           {erro}
         </span>
       ) : null}
@@ -31,100 +23,81 @@ function Campo({
   );
 }
 
-const entrada = "rounded-md border border-line px-3 py-2 text-navy";
-
-export function FormularioLocador({ inicial, id }: Props) {
+export function FormularioLocador({ inicial, id, titulo }: Props) {
   const [estado, acao, enviando] = useActionState<EstadoLocador | undefined, FormData>(salvarLocadorAction, undefined);
   const [formaRepasse, setFormaRepasse] = useState(inicial.formaRepasse);
   const erros = estado?.erros ?? {};
 
   return (
-    <form action={acao} className="flex flex-col gap-6 rounded-lg border border-line bg-white p-5" noValidate>
+    <form action={acao} noValidate aria-label="Cadastro do locador" className="flex flex-col gap-4 rounded-2xl border border-[#E8ECF3] bg-white p-5 shadow-sm sm:p-6">
       {id ? <input type="hidden" name="id" value={id} /> : null}
+      {/* Campos que o design não mostra: mantidos para não perder o que já está gravado. */}
+      <input type="hidden" name="codigoBanco" value={inicial.codigoBanco} />
+      <input type="hidden" name="tipoConta" value={inicial.tipoConta} />
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <h2 className="text-lg font-bold text-navy sm:col-span-2">Dados do locador</h2>
-        <Campo rotulo="Nome *" nome="nome" erro={erros.nome}>
-          <input name="nome" defaultValue={inicial.nome} required className={entrada} />
+      <h2 className="text-[20px] font-extrabold text-[#002356]">{titulo}</h2>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Campo rotulo="Nome ou razão social *" erro={erros.nome}>
+          <input name="nome" defaultValue={inicial.nome} className={entrada} />
         </Campo>
-        <Campo rotulo="CPF ou CNPJ *" nome="documento" erro={erros.documento}>
-          <input name="documento" defaultValue={inicial.documento} required inputMode="text" className={entrada} />
+        <Campo rotulo="CPF ou CNPJ *" erro={erros.documento}>
+          <input name="documento" defaultValue={inicial.documento} autoComplete="off" className={entrada} />
         </Campo>
-        <Campo rotulo="E-mail" nome="email" erro={erros.email}>
+        <Campo rotulo="E-mail" erro={erros.email}>
           <input type="email" name="email" defaultValue={inicial.email} autoComplete="off" className={entrada} />
         </Campo>
-        <Campo rotulo="Cidade" nome="cidade">
+        <Campo rotulo="Telefone" erro={erros.whatsapp}>
+          <input name="whatsapp" defaultValue={inicial.whatsapp} inputMode="tel" placeholder="(27) 99999-8888" className={entrada} />
+        </Campo>
+        <Campo rotulo="Cidade">
           <input name="cidade" defaultValue={inicial.cidade} className={entrada} />
         </Campo>
-        <Campo rotulo="WhatsApp" nome="whatsapp" erro={erros.whatsapp}>
-          <input name="whatsapp" defaultValue={inicial.whatsapp} placeholder="(27) 99999-8888" className={entrada} />
+        <Campo rotulo="Taxa de administração (%) *" erro={erros.taxa}>
+          <input name="taxa" defaultValue={inicial.taxa} inputMode="decimal" className={entrada} />
         </Campo>
-        <Campo rotulo="Taxa de administração (%) *" nome="taxa" erro={erros.taxa}>
-          <input name="taxa" defaultValue={inicial.taxa} required inputMode="decimal" className={entrada} />
-        </Campo>
-      </section>
+      </div>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <h2 className="text-lg font-bold text-navy sm:col-span-2">Repasse</h2>
-        <Campo rotulo="Forma de repasse *" nome="formaRepasse" erro={erros.formaRepasse}>
-          <select
-            name="formaRepasse"
-            value={formaRepasse}
-            onChange={(e) => setFormaRepasse(e.target.value)}
-            className={entrada}
-          >
-            <option value="PIX">Pix</option>
-            <option value="TRANSFERÊNCIA BANCÁRIA">Conta bancária</option>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Campo rotulo="Forma de repasse *" erro={erros.formaRepasse}>
+          <select name="formaRepasse" value={formaRepasse} onChange={(e) => setFormaRepasse(e.target.value)} className={entrada}>
+            <option value="PIX">{ROTULO_FORMA_DE_REPASSE.PIX}</option>
+            <option value="TRANSFERÊNCIA BANCÁRIA">{ROTULO_FORMA_DE_REPASSE["TRANSFERÊNCIA BANCÁRIA"]}</option>
           </select>
         </Campo>
 
         {formaRepasse === "PIX" ? (
           <>
-            <Campo rotulo="Tipo da chave Pix *" nome="tipoPix" erro={erros.tipoPix}>
+            <Campo rotulo="Tipo de chave Pix *" erro={erros.tipoPix}>
               <select name="tipoPix" defaultValue={inicial.tipoPix} className={entrada}>
                 {TIPOS_DE_PIX.map((t) => (
                   <option key={t} value={t}>
-                    {t}
+                    {ROTULO_TIPO_DE_PIX[t]}
                   </option>
                 ))}
               </select>
             </Campo>
-            <Campo rotulo="Chave Pix *" nome="chavePix" erro={erros.chavePix}>
-              <input name="chavePix" defaultValue={inicial.chavePix} className={entrada} />
+            <Campo rotulo="Chave Pix *" erro={erros.chavePix}>
+              <input name="chavePix" defaultValue={inicial.chavePix} autoComplete="off" className={entrada} />
             </Campo>
           </>
         ) : (
           <>
-            <Campo rotulo="Banco *" nome="banco" erro={erros.banco}>
+            <Campo rotulo="Banco *" erro={erros.banco}>
               <input name="banco" defaultValue={inicial.banco} className={entrada} />
             </Campo>
-            <Campo rotulo="Código do banco" nome="codigoBanco">
-              <input name="codigoBanco" defaultValue={inicial.codigoBanco} className={entrada} />
+            <Campo rotulo="Agência *" erro={erros.agencia}>
+              <input name="agencia" defaultValue={inicial.agencia} inputMode="numeric" className={entrada} />
             </Campo>
-            <Campo rotulo="Agência *" nome="agencia" erro={erros.agencia}>
-              <input name="agencia" defaultValue={inicial.agencia} className={entrada} />
-            </Campo>
-            <Campo rotulo="Conta *" nome="conta" erro={erros.conta}>
-              <input name="conta" defaultValue={inicial.conta} className={entrada} />
-            </Campo>
-            <Campo rotulo="Dígito da conta" nome="digitoConta">
-              <input name="digitoConta" defaultValue={inicial.digitoConta} className={entrada} />
-            </Campo>
-            <Campo rotulo="Tipo de conta *" nome="tipoConta" erro={erros.tipoConta}>
-              <select name="tipoConta" defaultValue={inicial.tipoConta} className={entrada}>
-                {TIPOS_DE_CONTA.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
+            <Campo rotulo="Conta com dígito *" erro={erros.conta}>
+              <input name="conta" defaultValue={inicial.conta} placeholder="12345-6" className={entrada} />
             </Campo>
           </>
         )}
-      </section>
+      </div>
 
       {estado?.duplicado ? (
-        <p className="font-semibold text-navy">
+        <p className="font-semibold text-[#002356]">
           Este CPF/CNPJ já está cadastrado.{" "}
           <Link href={`/locadores?id=${estado.duplicado.id}`} className="underline">
             Abrir {estado.duplicado.nome}
@@ -132,16 +105,16 @@ export function FormularioLocador({ inicial, id }: Props) {
         </p>
       ) : null}
       {estado?.erroGeral ? (
-        <p role="alert" className="font-semibold text-red-800">
+        <p role="alert" className="rounded-[10px] bg-[#FBE9E9] p-3 font-semibold text-[#8A1C1C]">
           {estado.erroGeral}
         </p>
       ) : null}
 
-      <div className="flex gap-2">
-        <button type="submit" disabled={enviando} className="rounded-md bg-navy px-4 py-2 font-semibold text-white disabled:opacity-60">
-          {id ? "Salvar alterações" : "Cadastrar locador"}
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" disabled={enviando} className="min-h-11 rounded-[10px] bg-[#002356] px-5 font-bold text-white disabled:opacity-60">
+          {id ? "Salvar alterações" : "Salvar locador"}
         </button>
-        <Link href={id ? `/locadores?id=${id}` : "/locadores"} className="rounded-md border border-line px-4 py-2 font-semibold text-navy">
+        <Link href={id ? `/locadores?id=${id}` : "/locadores"} className="flex min-h-11 items-center rounded-[10px] border border-[#A9B4C6] px-5 font-semibold text-[#0E1B33]">
           Cancelar
         </Link>
       </div>

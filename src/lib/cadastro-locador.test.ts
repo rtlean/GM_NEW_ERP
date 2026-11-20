@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizarTaxa, normalizarWhatsApp, validarLocador, type EntradaLocador } from "./cadastro-locador";
+import { normalizarTaxa, normalizarWhatsApp, paraFormulario, separarContaComDigito, validarLocador, type EntradaLocador } from "./cadastro-locador";
 
 const base: EntradaLocador = {
   nome: "Maria Silva",
@@ -15,7 +15,6 @@ const base: EntradaLocador = {
   codigoBanco: "",
   agencia: "",
   conta: "",
-  digitoConta: "",
   tipoConta: "",
 };
 
@@ -35,11 +34,21 @@ describe("normalizarTaxa", () => {
   it("converte 10 para 1000 centésimos", () => {
     expect(normalizarTaxa("10")).toEqual({ ok: true, valor: 1000 });
   });
-  it("aceita vírgula decimal", () => {
-    expect(normalizarTaxa("10,5")).toEqual({ ok: true, valor: 1050 });
+  it("aceita vírgula decimal (taxa flexível por locador)", () => {
+    expect(normalizarTaxa("8")).toEqual({ ok: true, valor: 800 });
+    expect(normalizarTaxa("12,5")).toEqual({ ok: true, valor: 1250 });
   });
   it("recusa acima de 100", () => {
     expect(normalizarTaxa("101").ok).toBe(false);
+  });
+});
+
+describe("separarContaComDigito", () => {
+  it("separa conta e dígito pelo último traço", () => {
+    expect(separarContaComDigito("12345-6")).toEqual({ conta: "12345", digito: "6" });
+  });
+  it("sem traço, tudo é conta", () => {
+    expect(separarContaComDigito("123456")).toEqual({ conta: "123456", digito: null });
   });
 });
 
@@ -58,6 +67,11 @@ describe("validarLocador", () => {
     }
   });
 
+  it("aceita chave Pix aleatória sem alterar o valor", () => {
+    const r = validarLocador({ ...base, tipoPix: "ALEATÓRIA", chavePix: "A1b2-C3d4" });
+    expect(r.ok && r.dados.pix_key).toBe("A1b2-C3d4");
+  });
+
   it("exige nome e documento", () => {
     const r = validarLocador({ ...base, nome: " ", documento: "" });
     expect(r.ok).toBe(false);
@@ -68,23 +82,34 @@ describe("validarLocador", () => {
   });
 
   it("não aceita CPF inválido", () => {
-    const r = validarLocador({ ...base, documento: "52998224726" });
-    expect(r.ok).toBe(false);
+    expect(validarLocador({ ...base, documento: "52998224726" }).ok).toBe(false);
   });
 
-  it("transferência bancária exige banco, agência, conta e tipo", () => {
-    const r = validarLocador({ ...base, formaRepasse: "TRANSFERÊNCIA BANCÁRIA", tipoPix: "", chavePix: "" });
-    expect(r.ok).toBe(false);
-    if (!r.ok) {
-      expect(r.erros.banco).toBeDefined();
-      expect(r.erros.agencia).toBeDefined();
-      expect(r.erros.conta).toBeDefined();
-      expect(r.erros.tipoConta).toBeDefined();
+  it("conta bancária exige banco, agência e conta; grava conta e dígito separados", () => {
+    const vazio = validarLocador({ ...base, formaRepasse: "TRANSFERÊNCIA BANCÁRIA", tipoPix: "", chavePix: "" });
+    expect(vazio.ok).toBe(false);
+    if (!vazio.ok) {
+      expect(vazio.erros.banco).toBeDefined();
+      expect(vazio.erros.agencia).toBeDefined();
+      expect(vazio.erros.conta).toBeDefined();
     }
+    const ok = validarLocador({ ...base, formaRepasse: "TRANSFERÊNCIA BANCÁRIA", tipoPix: "", chavePix: "", banco: "Sicredi", agencia: "0123", conta: "12345-6" });
+    expect(ok.ok && ok.dados.bank_account).toBe("12345");
+    expect(ok.ok && ok.dados.bank_account_digit).toBe("6");
   });
 
   it("chave de e-mail vira minúscula", () => {
     const r = validarLocador({ ...base, tipoPix: "E-MAIL", chavePix: "Maria@Exemplo.com" });
     expect(r.ok && r.dados.pix_key).toBe("maria@exemplo.com");
+  });
+});
+
+describe("paraFormulario", () => {
+  it("novo locador começa com taxa de 10%", () => {
+    expect(paraFormulario({}).taxa).toBe("10");
+  });
+  it("junta conta e dígito no campo Conta com dígito", () => {
+    const f = paraFormulario({ bank_account: "12345", bank_account_digit: "6" });
+    expect(f.conta).toBe("12345-6");
   });
 });
