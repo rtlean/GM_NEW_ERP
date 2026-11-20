@@ -43,13 +43,13 @@ describe("montarPainel", () => {
       { id: 3, tipo: "GALPAO", ownerId: 11, aluguelCentavos: 500000 },
     ],
     locadores: [
-      { id: 10, nome: "Maria Silva", taxaPropria: true },
-      { id: 11, nome: "Carlos Souza", taxaPropria: false },
+      { id: 10, nome: "Maria Silva", taxaPropria: true, taxaBps: 500 },
+      { id: 11, nome: "Carlos Souza", taxaPropria: false, taxaBps: null },
     ],
     locatarios: [
-      { id: 100, nome: "Joao Pedro Lima", telefone: "5527999998888" },
-      { id: 101, nome: "João Pedro Lima", telefone: null },
-      { id: 102, nome: "Ana Costa", telefone: "5527988887777" },
+      { id: 100, nome: "Joao Pedro Lima", telefone: "5527999998888", taxaBps: null },
+      { id: 101, nome: "João Pedro Lima", telefone: null, taxaBps: null },
+      { id: 102, nome: "Ana Costa", telefone: "5527988887777", taxaBps: null },
     ],
     contratos: [
       { locatarioId: 100, propertyId: 1, aluguelCentavos: 100000, taxaPropria: false },

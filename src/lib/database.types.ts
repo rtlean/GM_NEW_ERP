@@ -571,6 +571,7 @@ export type Database = {
           admin_fee_percent_basis_points: number | null
           company_id: number | null
           created_at: string
+          due_day: number | null
           end_date: string | null
           guarantee_type: string | null
           id: number
@@ -584,6 +585,7 @@ export type Database = {
         Insert: {
           adjustment_index?: string | null
           admin_fee_percent_basis_points?: number | null
+          due_day?: number | null
           company_id?: number | null
           created_at?: string
           end_date?: string | null
@@ -599,6 +601,7 @@ export type Database = {
         Update: {
           adjustment_index?: string | null
           admin_fee_percent_basis_points?: number | null
+          due_day?: number | null
           company_id?: number | null
           created_at?: string
           end_date?: string | null

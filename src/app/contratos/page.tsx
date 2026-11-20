@@ -6,7 +6,7 @@ import { listarLocadoresParaPainel } from "@/lib/locadores";
 import { listarLocatariosParaPainel } from "@/lib/locatarios";
 import { AssistenteNovoContrato } from "@/components/contratos/AssistenteNovoContrato";
 
-// Tela de Contratos no layout do design. Esta entrega (US-3.5a) só lista e escolhe locador, imóvel e locatário.
+// Tela de Contratos no layout do design: lista (leitura) e assistente de novo contrato (US-3.5b).
 const FILTROS: { valor: FiltroSituacao; rotulo: string }[] = [
   { valor: "todos", rotulo: "Todos" },
   { valor: "ativos", rotulo: "Ativos" },
@@ -22,10 +22,10 @@ function dataCurta(iso: string): string {
 export default async function PaginaContratos({
   searchParams,
 }: {
-  searchParams: Promise<{ busca?: string; situacao?: string; novo?: string }>;
+  searchParams: Promise<{ busca?: string; situacao?: string; novo?: string; criado?: string }>;
 }) {
   await exigirAcesso("contratos");
-  const { busca = "", situacao = "todos", novo } = await searchParams;
+  const { busca = "", situacao = "todos", novo, criado } = await searchParams;
   const filtro: FiltroSituacao = FILTROS.some((f) => f.valor === situacao) ? (situacao as FiltroSituacao) : "todos";
   const mostrarAssistente = novo === "1";
 
@@ -60,6 +60,12 @@ export default async function PaginaContratos({
           </Link>
         )}
       </header>
+
+      {criado ? (
+        <p role="status" className="rounded-[12px] bg-[#DDF0E7] p-3.5 font-semibold text-[#17533B]">
+          Contrato {criado} criado. O aluguel já aparece na lista de ativos.
+        </p>
+      ) : null}
 
       {mostrarAssistente ? <AssistenteNovoContrato locadores={locadores} imoveis={imoveis} locatarios={locatarios} /> : null}
 

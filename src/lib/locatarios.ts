@@ -158,12 +158,12 @@ export async function salvarLocatario(dados: DadosLocatario, id?: number): Promi
   return data.id;
 }
 
-export type LocatarioParaPainel = { id: number; nome: string; telefone: string | null };
+export type LocatarioParaPainel = { id: number; nome: string; telefone: string | null; taxaBps: number | null };
 
 /** Nome e telefone de cada locatário, para o painel (Dashboard). Só leitura. */
 export async function listarLocatariosParaPainel(): Promise<LocatarioParaPainel[]> {
-  const { data, error } = await obterClienteServidor().from("tenants").select("id, full_name, phone").eq("company_id", EMPRESA_ID);
+  const { data, error } = await obterClienteServidor().from("tenants").select("id, full_name, phone, admin_fee_basis_points").eq("company_id", EMPRESA_ID);
   if (error) throw new Error("Não foi possível carregar os locatários.");
 
-  return (data ?? []).map((l) => ({ id: l.id, nome: l.full_name, telefone: l.phone }));
+  return (data ?? []).map((l) => ({ id: l.id, nome: l.full_name, telefone: l.phone, taxaBps: l.admin_fee_basis_points }));
 }

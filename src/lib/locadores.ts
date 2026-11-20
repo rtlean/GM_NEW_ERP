@@ -99,7 +99,7 @@ export async function listarLocadores(filtros: FiltrosLocadores = {}): Promise<L
   });
 }
 
-export type LocadorParaPainel = { id: number; nome: string; taxaPropria: boolean };
+export type LocadorParaPainel = { id: number; nome: string; taxaPropria: boolean; taxaBps: number | null };
 
 /** Nome e se o locador tem taxa de administração própria, para o painel (Dashboard). Só leitura. */
 export async function listarLocadoresParaPainel(): Promise<LocadorParaPainel[]> {
@@ -109,5 +109,5 @@ export async function listarLocadoresParaPainel(): Promise<LocadorParaPainel[]> 
     .eq("company_id", EMPRESA_ID);
   if (error) throw new Error("Não foi possível carregar os locadores.");
 
-  return (data ?? []).map((o) => ({ id: o.id, nome: o.full_name, taxaPropria: o.admin_fee_percent_basis_points != null }));
+  return (data ?? []).map((o) => ({ id: o.id, nome: o.full_name, taxaPropria: o.admin_fee_percent_basis_points != null, taxaBps: o.admin_fee_percent_basis_points }));
 }
