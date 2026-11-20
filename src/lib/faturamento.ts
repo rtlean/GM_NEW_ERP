@@ -2,7 +2,7 @@ import "server-only";
 import { listarContratosAtivosNaCompetencia } from "./contratos";
 import { contratosComCobrancaNaCompetencia, gerarCobrancasDoMes, inquilinosEmAtrasoAte, type ResumoGeracao } from "./cobrancas";
 import { listarContatosDeLocatarios } from "./locatarios";
-import { temEmail, validarSelecao, type LinhaFaturamento } from "./faturamento-regras";
+import { temContatoDeCobranca, validarSelecao, type LinhaFaturamento } from "./faturamento-regras";
 import { vencimentoDaCompetencia } from "./cobrancas-gerar-regras";
 
 // Faturamento em lote (US-4.9). Monta a prévia do mês e gera só os contratos marcados.
@@ -27,7 +27,7 @@ export async function listarFaturamento(competencia: string): Promise<LinhaFatur
       inquilino: contato?.nome ?? `Inquilino ${tenantId}`,
       vencimento,
       aluguelCentavos: c.aluguelCentavos,
-      semEmail: !temEmail(contato?.email),
+      semContato: !temContatoDeCobranca(contato?.email, contato?.telefone),
       jaGerada: comCobranca.has(c.id),
       emAtraso: emAtraso.has(tenantId),
     };

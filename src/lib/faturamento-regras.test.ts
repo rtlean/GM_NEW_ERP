@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { situacaoDaLinha, temEmail, totalDaSelecao, validarSelecao, type LinhaFaturamento } from "./faturamento-regras";
+import { situacaoDaLinha, temContatoDeCobranca, totalDaSelecao, validarSelecao, type LinhaFaturamento } from "./faturamento-regras";
 
-const base: LinhaFaturamento = { contratoId: 1, inquilino: "Marina Couto", vencimento: "2026-11-10", aluguelCentavos: 280000, semEmail: false, jaGerada: false, emAtraso: false };
+const base: LinhaFaturamento = { contratoId: 1, inquilino: "Marina Couto", vencimento: "2026-11-10", aluguelCentavos: 280000, semContato: false, jaGerada: false, emAtraso: false };
 const linhas: LinhaFaturamento[] = [
   base,
   { ...base, contratoId: 2, inquilino: "Diego Lima", aluguelCentavos: 365000, emAtraso: true },
-  { ...base, contratoId: 3, inquilino: "Nexo Contábil Ltda", aluguelCentavos: 520000, semEmail: true },
+  { ...base, contratoId: 3, inquilino: "Nexo Contábil Ltda", aluguelCentavos: 520000, semContato: true },
   { ...base, contratoId: 4, inquilino: "Café Grão Ltda", aluguelCentavos: 440000, jaGerada: true },
 ];
 
@@ -19,20 +19,23 @@ describe("situacaoDaLinha", () => {
     expect(s.bloqueada).toBe(false);
     expect(s.marcadaInicialmente).toBe(true);
   });
-  it("sem e-mail fica bloqueado e desmarcado", () => {
-    expect(situacaoDaLinha(linhas[2])).toMatchObject({ texto: "Falta e-mail de cobrança", bloqueada: true, marcadaInicialmente: false });
+  it("sem e-mail nem WhatsApp fica bloqueado e desmarcado", () => {
+    expect(situacaoDaLinha(linhas[2])).toMatchObject({ texto: "Falta e-mail ou WhatsApp", bloqueada: true, marcadaInicialmente: false });
   });
   it("já gerada fica bloqueada, mesmo que tenha e-mail", () => {
     expect(situacaoDaLinha(linhas[3])).toMatchObject({ texto: "Cobrança já gerada", bloqueada: true, marcadaInicialmente: false });
   });
 });
 
-describe("temEmail", () => {
-  it("aceita e-mail com texto e recusa vazio, espaço ou nulo", () => {
-    expect(temEmail("dona@exemplo.com")).toBe(true);
-    expect(temEmail("   ")).toBe(false);
-    expect(temEmail("")).toBe(false);
-    expect(temEmail(null)).toBe(false);
+describe("temContatoDeCobranca", () => {
+  it("basta ter e-mail ou WhatsApp", () => {
+    expect(temContatoDeCobranca("dona@exemplo.com", null)).toBe(true);
+    expect(temContatoDeCobranca(null, "5527999998888")).toBe(true);
+    expect(temContatoDeCobranca("dona@exemplo.com", "5527999998888")).toBe(true);
+  });
+  it("sem nenhum dos dois não tem contato", () => {
+    expect(temContatoDeCobranca(null, null)).toBe(false);
+    expect(temContatoDeCobranca("   ", "")).toBe(false);
   });
 });
 
@@ -52,10 +55,10 @@ describe("validarSelecao", () => {
   it("recusa seleção vazia", () => {
     expect(validarSelecao(linhas, [])).toMatchObject({ ok: false });
   });
-  it("recusa contrato sem e-mail mesmo que venha do formulário", () => {
+  it("recusa contrato sem e-mail nem WhatsApp mesmo que venha do formulário", () => {
     const r = validarSelecao(linhas, [1, 3]);
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.erro).toContain("não tem e-mail");
+    if (!r.ok) expect(r.erro).toContain("não tem e-mail nem WhatsApp");
   });
   it("recusa contrato que já tem cobrança no mês", () => {
     expect(validarSelecao(linhas, [4])).toMatchObject({ ok: false });
