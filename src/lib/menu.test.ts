@@ -22,7 +22,7 @@ describe("menu do design", () => {
   it("marca como em construção só o que está fora da v1 ou ainda não existe", () => {
     const emConstrucao = (rota: string) => TODAS_AS_ROTAS.find((i) => i.rota === rota)?.emConstrucao === true;
     expect(emConstrucao("pipeline")).toBe(true);
-    expect(emConstrucao("faturamento")).toBe(true);
+    expect(emConstrucao("faturamento")).toBe(false);
     expect(emConstrucao("hoje")).toBe(true);
     expect(emConstrucao("imoveis")).toBe(false);
     expect(emConstrucao("locadores")).toBe(false);

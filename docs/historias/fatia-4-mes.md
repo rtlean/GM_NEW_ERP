@@ -112,3 +112,12 @@ Critérios:
 - Dado contrato sem e-mail do inquilino, então a linha não pode ser marcada.
 
 Tamanho: M · Depende de: US-4.1 (entregue)
+
+**Implementada (feat/us-4.9-faturamento)** — arquivos: `src/lib/faturamento.ts`, `src/lib/faturamento-regras.ts`, `src/app/faturamento/`, `src/components/faturamento/`.
+- Sem mudança de banco. Reaproveita `gerarCobrancasDoMes` com lista opcional de contratos.
+- Definições escolhidas na implementação (dono confirma):
+  - **Inquilino em atraso** = tem alguma cobrança de mês anterior com saldo em aberto (`pending_cents > 0`). Não bloqueia.
+  - **Cobrança já gerada** = o contrato já tem cobrança no mês. Aparece bloqueado e desmarcado.
+  - **Falta e-mail de cobrança** = inquilino sem e-mail preenchido. Bloqueia.
+- O servidor refaz a checagem: um contrato bloqueado não é gerado mesmo que a tela seja alterada.
+- Roteiro de teste manual: (1) abrir Faturamento no mês atual e conferir linhas e totais; (2) desmarcar uma linha e ver o total mudar; (3) tentar marcar um contrato sem e-mail (deve estar bloqueado); (4) gerar, conferir em Cobrança e gerar de novo (não pode duplicar).
