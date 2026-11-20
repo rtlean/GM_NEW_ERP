@@ -135,3 +135,26 @@ export async function baixarDocumentoAtual(contratoId: number): Promise<{ bytes:
   if (error || !data) throw new Error("Não foi possível abrir o arquivo do contrato.");
   return { bytes: new Uint8Array(await data.arrayBuffer()), documento };
 }
+
+/** Arquivo atual de cada contrato, numa consulta só (para a lista). Contratos sem arquivo não entram no mapa. */
+export async function documentosAtuaisPorContrato(contratoIds: number[]): Promise<Map<number, DocumentoAtual>> {
+  const mapa = new Map<number, DocumentoAtual>();
+  if (contratoIds.length === 0) return mapa;
+
+  const { data, error } = await obterClienteServidor()
+    .from("contract_documents")
+    .select("id, contract_id, version, file_name, mime_type, created_at")
+    .eq("company_id", EMPRESA_ID)
+    .in("contract_id", contratoIds)
+    .order("version", { ascending: false });
+  if (error) throw new Error("Não foi possível carregar os arquivos dos contratos.");
+
+  // Ordenado da maior para a menor versão: a primeira linha de cada contrato é a atual.
+  for (const linha of data ?? []) {
+    if (linha.contract_id == null || mapa.has(linha.contract_id)) continue;
+    const tipo = tipoPorMime(linha.mime_type);
+    if (!tipo) continue;
+    mapa.set(linha.contract_id, { id: linha.id, versao: linha.version, nomeArquivo: linha.file_name, tipo, criadoEm: linha.created_at });
+  }
+  return mapa;
+}

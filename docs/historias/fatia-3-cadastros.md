@@ -209,3 +209,9 @@ Taxa de administração: continua flexível por locador (decisão do dono), sem 
 - Cobranças após o último mês dependem do módulo de mês (fatia 4).
 - Sem migração de banco.
 
+## Nota de implementação — Lista de contratos com arquivo (branch feat/contratos-lista-anexo)
+- Coluna "Arquivo" (Word, PDF ou Sem arquivo) e botão "Abrir" em cada linha da lista, para chegar ao anexo sem depender do número do contrato.
+- Filtro "Com contrato" / "Sem contrato" de volta, no lugar que o design pede (estava pendente da US-3.6). Combina com Todos/Ativos/Encerrados e com a busca.
+- Arquivos da lista vêm de uma consulta só (`documentosAtuaisPorContrato`), não uma por linha.
+- Regras puras em `src/lib/contratos-lista-regras.ts` (testadas).
+
