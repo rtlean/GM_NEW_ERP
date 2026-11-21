@@ -7,7 +7,7 @@ const construcao = (rota: string, rotulo: string): ItemMenu => ({ rota, rotulo, 
 
 export const MENU: GrupoMenu[] = [
   { rotulo: "Dashboard", itens: [{ rota: "dashboard", rotulo: "Dashboard" }] },
-  { rotulo: "Pipeline", emConstrucao: true, itens: [construcao("pipeline", "Pipeline")] },
+  { rotulo: "Pipeline", itens: [{ rota: "pipeline", rotulo: "Pipeline" }] },
   { rotulo: "Imóveis", itens: [{ rota: "imoveis", rotulo: "Imóveis" }] },
   {
     rotulo: "Locação",

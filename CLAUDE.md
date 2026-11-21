@@ -9,7 +9,7 @@ O dono do projeto **não é programador**: explique cada decisão em português 
 
 ## Escopo (v1)
 Login/usuários, Locadores, Locatários, Imóveis, Contratos, Lançamentos, Relatório mensal (PDF) e Dashboard.
-**Fora — não implementar nem preparar código para:** Pix, NFS-e, e-mail automático, Consórcio, Financiamento, Pipeline, Conta digital. (Sicredi e WhatsApp entram na v1 por decisão do dono em 19/11/2026.)
+**Fora — não implementar nem preparar código para:** Pix, NFS-e, e-mail automático, Consórcio, Financiamento, Conta digital. (Sicredi e WhatsApp entram na v1 por decisão do dono em 19/11/2026.)
 
 ## Stack (não trocar sem aprovação)
 - **Next.js** (App Router) + **TypeScript** + **Tailwind CSS** — um único projeto, telas e servidor juntos.

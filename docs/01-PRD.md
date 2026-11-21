@@ -26,7 +26,7 @@
 ### Escopo
 **Dentro (v1, acordado com o dono em 14/11/2026):** login e perfis; locadores, locatários, imóveis, contratos (PDF, alteração de aluguel, encerramento); reajuste anual pelo índice e aditivo em PDF; repasse manual ao locador (sem Pix nem TED); cobranças do mês com registro manual de pagamento; lançamentos; cálculo da taxa; relatório mensal em PDF (download); dashboard; migração dos dados.
 
-**Fora da v1:** Pix, NFS-e, e-mail automático, consórcio, financiamento, pipeline, conta digital, seguros, garantias, DIMOB, financeiro, repasses automáticos. Sicredi e WhatsApp entram na v1 (decisão do dono, 19/11/2026).
+**Fora da v1:** Pix, NFS-e, e-mail automático, consórcio, financiamento, conta digital, seguros, garantias, DIMOB, financeiro, repasses automáticos. Sicredi e WhatsApp entram na v1 (decisão do dono, 19/11/2026).
 
 ### Requisitos funcionais (MVP)
 | ID | Requisito |
