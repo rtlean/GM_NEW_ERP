@@ -58,3 +58,11 @@ Regras puras em `src/lib/dashboard-regras.ts` (testadas). Leitura em cada módul
 - Desempenho das locações fica fora desta versão (decisão do dono).
 - Botões de e-mail e WhatsApp abrem o app com texto pronto. Não enviam sozinhos.
 - Pendente: campo CONFERIDO (só admin), da US-5.3.
+
+## Correção de layout e página de Desempenho (feat/us-5.2-correcao-relatorio)
+- Folha em cinco páginas A4 paisagem, como o design: (1) Locatários e totais, (2) Rateio e Pendências, (3) Resumo final e Despesa do mês, (4) Conta para repasse, (5) Desempenho das locações.
+- Cabeçalho em todas as páginas: logo (`public/logo.png`), linha dourada, PROPRIETÁRIO e CIDADE.
+- Tabelas com largura fixa de colunas, sem barra de rolagem na impressão (a tabela de locatários cabe na página).
+- Desempenho: receita prevista e recebida dos seis meses até a competência (mês sem cobrança aparece como "sem dados"); ocupação dos imóveis do locador; variação do recebido em relação ao mês anterior; locatários ativos; índice de recebimento.
+- Fora desta versão, por falta de regra definida: "Crescimento da receita", "Saúde da carteira" (pontuação) e "Por que esta classificação?".
+- Impressão: `@page` A4 paisagem sem margem (a margem é o próprio espaçamento das páginas).

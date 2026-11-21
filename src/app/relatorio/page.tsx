@@ -24,8 +24,6 @@ export default async function PaginaRelatorio({ searchParams }: { searchParams: 
 
   return (
     <div className="flex flex-col gap-5">
-      <style>{`@page { size: A4 landscape; margin: 8mm; }
-        @media print { body * { visibility: hidden; } .area-impressao, .area-impressao * { visibility: visible; } .area-impressao { position: absolute; left: 0; top: 0; width: 100%; } .no-print { display: none !important; } }`}</style>
       <header className="no-print flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-[32px] font-extrabold leading-tight tracking-tight text-navy">Relatório mensal</h1>

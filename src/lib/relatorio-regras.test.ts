@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { aluguelPago, classificarCategoria, montarLinhaLocatario, montarRateio, resumoRelatorio, rotuloStatus, taxaDaLinha, type CobrancaRelatorio, type DespesaRelatorio } from "./relatorio-regras";
+import { competenciasAnteriores, variacaoBps, razaoBps } from "./relatorio-regras";
 
 const cobranca = (over: Partial<CobrancaRelatorio> = {}): CobrancaRelatorio => ({
   contratoId: 1, locatario: "Inquilino A", imovel: "Casa 1", imovelId: 10, aluguelCentavos: 100000, pagoCentavos: 100000,
@@ -86,5 +87,23 @@ describe("rotuloStatus", () => {
   it("traduz o status do banco", () => {
     expect(rotuloStatus("overdue")).toBe("Atrasado");
     expect(rotuloStatus("paid")).toBe("Pago");
+  });
+});
+
+
+describe("desempenho do relatório", () => {
+  it("lista competências anteriores em ordem, cruzando o ano", () => {
+    expect(competenciasAnteriores("2026-11", 3)).toEqual(["2026-08", "2026-09", "2026-10"]);
+    expect(competenciasAnteriores("2026-02", 3)).toEqual(["2025-11", "2025-12", "2026-01"]);
+  });
+
+  it("calcula variação em relação ao mês anterior e devolve null sem base", () => {
+    expect(variacaoBps(8230000, 10000000)).toBe(-1770);
+    expect(variacaoBps(100, 0)).toBeNull();
+  });
+
+  it("calcula razão em basis points e devolve null sem total", () => {
+    expect(razaoBps(2980800, 4302800)).toBe(6928);
+    expect(razaoBps(1, 0)).toBeNull();
   });
 });
