@@ -20,8 +20,7 @@ export function RelatorioFolha({ r }: { r: RelatorioLocador }) {
       <style>{ESTILO_FOLHA}</style>
 
       <section className="pagina">
-        {cabecalho}
-        <h2 className="titulo-pagina">RELATÓRIO MENSAL DE LOCAÇÃO – {mes}</h2>
+        <Cabecalho r={r} comFaixa mesExtenso={mesExtenso(r.competencia)} />
         <Tabela
           titulo="Locatários"
           larguras={["3%", "13%", "11%", "6%", "6%", "5%", "5%", "5%", "5%", "5%", "6.5%", "5%", "6%", "6%", "6%", "6%"]}
@@ -121,20 +120,31 @@ export function RelatorioFolha({ r }: { r: RelatorioLocador }) {
   );
 }
 
-function Cabecalho({ r }: { r: RelatorioLocador }) {
+function Cabecalho({ r, comFaixa = false, mesExtenso: mes = "" }: { r: RelatorioLocador; comFaixa?: boolean; mesExtenso?: string }) {
   return (
     <header className="cabecalho">
-      {/* eslint-disable-next-line @next/next/no-img-element -- imagem estática da pasta public, usada no PDF */}
-      <img src="/logo.png" alt="Soluções Imobiliárias" className="logo" />
+      <div className="linha-cabecalho">
+        {/* eslint-disable-next-line @next/next/no-img-element -- imagem estática da pasta public, usada no PDF */}
+        <img src="/logo.png" alt="Soluções Imobiliárias" className="logo" />
+        {comFaixa ? (
+          <>
+            <span className="barra-inclinada" />
+            <div className="faixa-titulo">
+              RELATÓRIO MENSAL DE LOCAÇÃO –{" "}<span className="mes-dourado">{mes}</span>
+            </div>
+            <span className="barra-inclinada" />
+          </>
+        ) : null}
+      </div>
       <div className="identificacao">
         <div className="bloco-id">
           <span className="rotulo-id">PROPRIETÁRIO:</span>
           <strong className="nome-id">{r.locador.nome}</strong>
         </div>
-        <div className="barra-dourada" />
+        <div className="divisor-dourado" />
         <div className="bloco-id">
           <span className="rotulo-id">CIDADE:</span>
-          <strong className="nome-id">{r.locador.cidade ?? "—"}</strong>
+          <strong className="nome-id">{r.locador.cidade ?? ""}</strong>
         </div>
       </div>
     </header>
@@ -245,13 +255,17 @@ const ESTILO_FOLHA = `
   font-family: Arial, Helvetica, sans-serif; font-size: 10px; line-height: 1.3; display: flex; flex-direction: column; gap: 10px; overflow: hidden;
   page-break-after: always; break-after: page; }
 .pagina:last-child { page-break-after: auto; break-after: auto; }
-.cabecalho { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.logo { width: 160px; height: 46px; object-fit: contain; }
-.identificacao { width: 100%; display: flex; align-items: stretch; gap: 14px; }
+.cabecalho { display: flex; flex-direction: column; gap: 8px; }
+.linha-cabecalho { display: flex; align-items: center; gap: 8px; height: 58px; }
+.logo { width: 150px; height: 44px; object-fit: contain; flex: 0 0 auto; }
+.barra-inclinada { width: 3px; height: 54px; background: #C9A227; transform: skewX(-20deg); flex: 0 0 auto; }
+.faixa-titulo { flex: 1 1 auto; height: 54px; display: flex; align-items: center; justify-content: center; background: #1A365D; color: #fff; font: 700 15px Arial, Helvetica, sans-serif; clip-path: polygon(2% 0, 100% 0, 98% 100%, 0 100%); }
+.mes-dourado { color: #C9A227; }
+.identificacao { display: flex; align-items: stretch; gap: 14px; border: 1px solid #D9D2B5; padding: 5px 8px; }
 .bloco-id { flex: 1 1 50%; }
-.rotulo-id { display: block; color: #4F5B72; }
-.nome-id { font-size: 12px; }
-.barra-dourada { width: 1px; background: #C9A227; }
+.divisor-dourado { width: 1px; background: #C9A227; }
+.rotulo-id { display: block; color: #4F5B72; font-size: 9px; }
+.nome-id { font-size: 11px; }
 .titulo-pagina { margin: 0; font: 700 14px Arial, Helvetica, sans-serif; color: #002356; }
 .faixa-cinza { margin: 0; padding: 4px; background: #DCE6F1; color: #1A365D; font: 700 11px Arial, Helvetica, sans-serif; text-align: center; }
 .faixa-cinza.verde { background: #92D050; }
@@ -294,4 +308,11 @@ function data(iso: string | null): string {
 function competenciaTexto(competencia: string): string {
   const [a, m] = competencia.split("-");
   return `${m}/${a}`;
+}
+
+const MESES = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
+
+function mesExtenso(competencia: string): string {
+  const [a, m] = competencia.split("-");
+  return `${MESES[Number(m) - 1]} DE ${a}`;
 }
