@@ -8,6 +8,7 @@ import { alterarConferenciaAction } from "./actions";
 import { dataHoraTexto, podeMarcarConferencia } from "@/lib/relatorio-regras";
 import { RelatorioFolha } from "@/components/relatorio/RelatorioFolha";
 import { BotaoImprimir } from "@/components/relatorio/BotaoImprimir";
+import { BotaoCompartilharPdf } from "@/components/relatorio/BotaoCompartilharPdf";
 import { formatarReais } from "@/lib/dinheiro";
 
 // Relatório mensal (US-5.1 a 5.3), layout do design RelatorioMensal.dc.html.
@@ -64,12 +65,7 @@ export default async function PaginaRelatorio({ searchParams }: { searchParams: 
           {relatorio ? (
             <>
               <BotaoImprimir nomeArquivo={nomeArquivo} />
-              <a href={`mailto:?subject=${encodeURIComponent(`Relatório mensal de locação ${competencia}`)}&body=${encodeURIComponent(texto)}`} className="flex min-h-11 items-center rounded-[10px] border border-[#A9B4C6] bg-white px-4 font-semibold text-navy">
-                Enviar por e-mail
-              </a>
-              <a href={`https://wa.me/?text=${encodeURIComponent(texto)}`} target="_blank" rel="noopener" className="flex min-h-11 items-center rounded-[10px] border border-[#A9B4C6] bg-white px-4 font-semibold text-navy">
-                Enviar por WhatsApp
-              </a>
+              <BotaoCompartilharPdf alvoId="area-pdf" nomeArquivo={nomeArquivo} assunto={`Relatório mensal de locação ${competencia}`} texto={texto} />
             </>
           ) : null}
         </div>
@@ -89,7 +85,7 @@ export default async function PaginaRelatorio({ searchParams }: { searchParams: 
         </nav>
         <section aria-label="Prévia do PDF" className="min-w-0 flex-[999_1_640px] overflow-x-auto rounded-2xl bg-[#E8EDF6] p-4">
           {relatorio ? (
-            <div className="mx-auto w-[1123px] max-w-full rounded-lg bg-white shadow-[0_8px_24px_rgba(0,35,86,.06)]">
+            <div id="area-pdf" className="mx-auto w-[1123px] max-w-full rounded-lg bg-white shadow-[0_8px_24px_rgba(0,35,86,.06)]">
               <RelatorioFolha r={relatorio} />
             </div>
           ) : (

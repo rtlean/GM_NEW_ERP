@@ -82,3 +82,17 @@ Roteiro de teste (como admin):
 4. Entre com um usuário operacional (perfil user): o botão não aparece.
 5. Com o relatório conferido, baixe o PDF: a linha CONFERIDO aparece no cabeçalho.
 
+
+## Implementação — US-5.4 Compartilhar PDF por e-mail e WhatsApp (feat/us-5.4-enviar-pdf)
+- Os botões "Enviar por e-mail" e "Enviar por WhatsApp" (só texto, sem anexo) foram trocados por "Compartilhar PDF".
+- O PDF é gerado no próprio navegador a partir da prévia do relatório (biblioteca `html2pdf.js`, usada só para isso). Nada é enviado pelo servidor.
+- Celular com suporte: abre a janela de compartilhamento do aparelho já com o PDF anexado (WhatsApp, e-mail etc.).
+- Aparelho sem suporte a anexo: baixa o PDF e mostra os links "Abrir e-mail" e "Abrir WhatsApp" com a mensagem pronta; a pessoa anexa o arquivo manualmente.
+- O "Baixar PDF" continua igual (impressão do navegador).
+- Limitação conhecida: o PDF gerado por esse método é uma imagem das páginas, não texto selecionável.
+
+Roteiro de teste:
+1. Abra Relatório mensal, competência 11/2026, locador Locatelli.
+2. Clique em "Compartilhar PDF". No celular, escolha WhatsApp ou e-mail: o PDF deve aparecer anexado.
+3. No computador, se aparecer a mensagem de que o PDF foi baixado, clique em "Abrir WhatsApp" ou "Abrir e-mail" e anexe o arquivo baixado.
+4. Compare o PDF recebido com o "Baixar PDF": as 5 páginas e o cabeçalho devem estar iguais.
