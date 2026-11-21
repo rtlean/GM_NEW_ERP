@@ -35,7 +35,7 @@ export async function criarLeadAction(_anterior: EstadoNovoLead, formData: FormD
   return { ok: true, nome: checagem.lead.nome };
 }
 
-/** Muda a etapa de um negócio. Só aceita uma das quatro etapas. */
+/** Muda a etapa de um negócio. Só aceita uma das cinco colunas (quatro de venda e Lead Frio). */
 export async function moverNegocioAction(id: number, etapa: string): Promise<{ erro?: string }> {
   await exigirAcesso("pipeline");
 

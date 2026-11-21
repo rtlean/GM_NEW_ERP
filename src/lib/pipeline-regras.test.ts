@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { etapaVizinha, filtrarPorBusca, resumoPipeline, validarNovoLead, valorParaCentavos } from "./pipeline-regras";
+import { ehEtapa, etapaVizinha, filtrarPorBusca, resumoPipeline, validarNovoLead, valorParaCentavos } from "./pipeline-regras";
 
 describe("valorParaCentavos", () => {
   it("converte texto em centavos sem ponto flutuante", () => {
@@ -50,9 +50,15 @@ describe("etapaVizinha", () => {
     expect(etapaVizinha("Proposta", -1)).toBe("Visita");
   });
 
-  it("não passa da primeira nem da última etapa", () => {
+  it("não passa da primeira nem da última coluna (Lead Frio)", () => {
     expect(etapaVizinha("Prospecção", -1)).toBeNull();
-    expect(etapaVizinha("Fechamento", 1)).toBeNull();
+    expect(etapaVizinha("Lead Frio", 1)).toBeNull();
+  });
+
+  it("Lead Frio fica no fim do fluxo: Fechamento avança para ele, e ele volta para Fechamento", () => {
+    expect(etapaVizinha("Fechamento", 1)).toBe("Lead Frio");
+    expect(etapaVizinha("Lead Frio", -1)).toBe("Fechamento");
+    expect(ehEtapa("Lead Frio")).toBe(true);
   });
 });
 

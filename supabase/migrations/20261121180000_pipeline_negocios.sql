@@ -11,7 +11,7 @@ create table if not exists public.pipeline_negocios (
   imovel character varying(160),
   valor_centavos integer not null check (valor_centavos > 0),
   etapa character varying(20) not null default 'Prospecção'
-    check (etapa in ('Prospecção', 'Visita', 'Proposta', 'Fechamento')),
+    check (etapa in ('Prospecção', 'Visita', 'Proposta', 'Fechamento', 'Lead Frio')),
   proximo_passo character varying(160),
   urgente boolean not null default false,
   criado_em timestamp with time zone not null default now(),

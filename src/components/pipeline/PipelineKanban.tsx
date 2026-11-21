@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { criarLeadAction, moverNegocioAction, type EstadoNovoLead } from "@/app/pipeline/actions";
 import { formatarReais } from "@/lib/dinheiro";
-import { ETAPAS, etapaVizinha, filtrarPorBusca, resumoPipeline, type Etapa } from "@/lib/pipeline-regras";
+import { ETAPAS, ETAPA_FRIA, etapaVizinha, filtrarPorBusca, resumoPipeline, type Etapa } from "@/lib/pipeline-regras";
 import type { Negocio } from "@/lib/pipeline";
 
 // Kanban do Pipeline (US-P.1), layout do design Pipeline.dc.html. Sem comissão e sem corretor (decisão do dono, 21/11/2026).
@@ -85,11 +85,11 @@ export function PipelineKanban({ negocios }: { negocios: Negocio[] }) {
       )}
 
       <div className="-mx-7 overflow-x-auto px-7 pb-3 pt-1">
-        <div className="grid grid-cols-[repeat(4,minmax(270px,1fr))] items-start gap-3.5">
-          {ETAPAS.map((etapa, posicao) => {
+        <div className="grid grid-cols-[repeat(5,minmax(270px,1fr))] items-start gap-3.5">
+          {ETAPAS.map((etapa) => {
             const cartoes = visiveis.filter((n) => n.etapa === etapa);
             const total = resumoPipeline(cartoes).totalCentavos;
-            const fim = posicao === ETAPAS.length - 1;
+            const fria = etapa === ETAPA_FRIA;
             const sobre = etapaSobre === etapa;
             return (
               <section
@@ -113,7 +113,7 @@ export function PipelineKanban({ negocios }: { negocios: Negocio[] }) {
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="text-[16px] font-bold text-navy">{etapa}</h2>
                     <span
-                      className={`flex h-[26px] min-w-[26px] items-center justify-center rounded-full px-1.5 font-bold ${fim ? "bg-gold text-navy" : "bg-navy text-white"}`}
+                      className={`flex h-[26px] min-w-[26px] items-center justify-center rounded-full px-1.5 font-bold ${fria ? "bg-muted text-white" : "bg-navy text-white"}`}
                     >
                       {cartoes.length}
                     </span>

@@ -26,7 +26,7 @@ export async function listarNegocios(): Promise<Negocio[]> {
   if (error) throw new Error("Não foi possível carregar o pipeline.");
 
   return (data ?? []).flatMap((linha) => {
-    // Etapa fora das quatro não deve existir (o banco impede); se existir, o cartão não é mostrado com etapa inventada.
+    // Etapa fora das cinco colunas não deve existir (o banco impede); se existir, o cartão não é mostrado com etapa inventada.
     if (!ehEtapa(linha.etapa)) return [];
     return [
       {

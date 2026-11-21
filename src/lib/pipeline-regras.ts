@@ -1,7 +1,9 @@
 // Pipeline (docs/historias/fatia-pipeline.md, US-P.1). Funções puras: sem banco, sem cookies.
-// Só quatro etapas, sem comissão e sem probabilidade (decisão do dono, 21/11/2026).
+// Quatro etapas de venda e a coluna final "Lead Frio" (oportunidade perdida), sem comissão e sem probabilidade
+// (decisões do dono, 21/11/2026).
 
-export const ETAPAS = ["Prospecção", "Visita", "Proposta", "Fechamento"] as const;
+export const ETAPAS = ["Prospecção", "Visita", "Proposta", "Fechamento", "Lead Frio"] as const;
+export const ETAPA_FRIA = "Lead Frio";
 export type Etapa = (typeof ETAPAS)[number];
 
 export const TIPOS_NEGOCIO = ["Locação", "Venda"] as const;
