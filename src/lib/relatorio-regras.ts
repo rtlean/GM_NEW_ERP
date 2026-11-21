@@ -180,3 +180,30 @@ export function razaoBps(parte: number, todo: number): number | null {
   if (todo <= 0) return null;
   return Math.round((parte * 10000) / todo);
 }
+
+/** Texto do campo CIDADE: "Colatina / ES". Vazio quando o cadastro não tem cidade. */
+export function cidadeComUf(cidade: string | null, uf: string | null): string {
+  if (!cidade) return "";
+  return uf ? `${cidade} / ${uf}` : cidade;
+}
+
+/** Só o administrador marca ou desmarca o relatório como conferido (US-5.3). */
+export function podeMarcarConferencia(perfil: { role: "admin" | "user" } | null): boolean {
+  return perfil?.role === "admin";
+}
+
+/** Data e hora de um momento no fuso de São Paulo, ex.: "21/11/2026 14:20". */
+export function dataHoraTexto(iso: string): string {
+  const partes = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date(iso));
+  const v = (tipo: string) => partes.find((p) => p.type === tipo)?.value ?? "";
+  return `${v("day")}/${v("month")}/${v("year")} ${v("hour")}:${v("minute")}`;
+}
+

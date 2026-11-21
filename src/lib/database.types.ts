@@ -1613,6 +1613,7 @@ export type Database = {
           beneficiary_name: string | null
           company_id: number | null
           city: string | null
+          state: string | null
           created_at: string
           document: string | null
           email: string | null
@@ -1637,6 +1638,7 @@ export type Database = {
           beneficiary_name?: string | null
           company_id?: number | null
           city?: string | null
+          state?: string | null
           created_at?: string
           document?: string | null
           email?: string | null
@@ -1661,6 +1663,7 @@ export type Database = {
           beneficiary_name?: string | null
           company_id?: number | null
           city?: string | null
+          state?: string | null
           created_at?: string
           document?: string | null
           email?: string | null
@@ -2151,6 +2154,51 @@ export type Database = {
           user_id?: number
         }
         Relationships: []
+      }
+      relatorio_conferencias: {
+        Row: {
+          company_id: number
+          competence: string
+          conferido: boolean
+          conferido_em: string | null
+          conferido_por: number | null
+          id: number
+          owner_id: number
+        }
+        Insert: {
+          company_id?: number
+          competence: string
+          conferido?: boolean
+          conferido_em?: string | null
+          conferido_por?: number | null
+          id?: number
+          owner_id: number
+        }
+        Update: {
+          company_id?: number
+          competence?: string
+          conferido?: boolean
+          conferido_em?: string | null
+          conferido_por?: number | null
+          id?: number
+          owner_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relatorio_conferencias_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relatorio_conferencias_conferido_por_fkey"
+            columns: ["conferido_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {

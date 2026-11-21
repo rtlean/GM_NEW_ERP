@@ -6,6 +6,7 @@ const base: EntradaLocador = {
   documento: "529.982.247-25",
   email: "",
   cidade: "Linhares",
+  uf: "",
   whatsapp: "(27) 99999-8888",
   taxa: "10",
   formaRepasse: "PIX",
@@ -111,5 +112,23 @@ describe("paraFormulario", () => {
   it("junta conta e dígito no campo Conta com dígito", () => {
     const f = paraFormulario({ bank_account: "12345", bank_account_digit: "6" });
     expect(f.conta).toBe("12345-6");
+  });
+});
+
+describe("UF do locador", () => {
+  it("aceita sigla de 2 letras e grava em maiúsculas", () => {
+    const r = validarLocador({ ...base, uf: "es" });
+    expect(r.ok && r.dados.state).toBe("ES");
+  });
+
+  it("deixa vazio quando não informada", () => {
+    const r = validarLocador({ ...base, uf: "" });
+    expect(r.ok && r.dados.state).toBe(null);
+  });
+
+  it("recusa sigla com mais de 2 letras", () => {
+    const r = validarLocador({ ...base, uf: "ESP" });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.uf).toBeDefined();
   });
 });

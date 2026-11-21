@@ -107,3 +107,28 @@ describe("desempenho do relatório", () => {
     expect(razaoBps(1, 0)).toBeNull();
   });
 });
+
+import { cidadeComUf, podeMarcarConferencia } from "./relatorio-regras";
+
+describe("cabeçalho e conferência", () => {
+  it("monta Cidade / UF e fica vazio sem cidade", () => {
+    expect(cidadeComUf("Colatina", "ES")).toBe("Colatina / ES");
+    expect(cidadeComUf("Colatina", null)).toBe("Colatina");
+    expect(cidadeComUf(null, "ES")).toBe("");
+  });
+
+  it("só admin pode marcar a conferência", () => {
+    expect(podeMarcarConferencia({ role: "admin" })).toBe(true);
+    expect(podeMarcarConferencia({ role: "user" })).toBe(false);
+    expect(podeMarcarConferencia(null)).toBe(false);
+  });
+});
+
+import { dataHoraTexto } from "./relatorio-regras";
+
+describe("data da conferência", () => {
+  it("mostra a data e hora no fuso de São Paulo", () => {
+    expect(dataHoraTexto("2026-11-21T17:20:00.000Z")).toBe("21/11/2026 14:20");
+  });
+});
+

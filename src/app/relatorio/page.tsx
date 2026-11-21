@@ -3,6 +3,9 @@ import { exigirAcesso } from "@/lib/acesso";
 import { competenciaAtual } from "@/lib/contratos-aluguel-regras";
 import { competenciaValida, competenciaParaTexto } from "@/lib/lancamentos-regras";
 import { listarLocadoresDoRelatorio, montarRelatorio } from "@/lib/relatorio";
+import { perfilAtual } from "@/lib/acesso";
+import { alterarConferenciaAction } from "./actions";
+import { dataHoraTexto, podeMarcarConferencia } from "@/lib/relatorio-regras";
 import { RelatorioFolha } from "@/components/relatorio/RelatorioFolha";
 import { BotaoImprimir } from "@/components/relatorio/BotaoImprimir";
 import { formatarReais } from "@/lib/dinheiro";
@@ -20,6 +23,8 @@ export default async function PaginaRelatorio({ searchParams }: { searchParams: 
   const texto = relatorio
     ? `Olá! Segue o relatório mensal de locação de ${competenciaParaTexto(competencia)} de ${relatorio.locador.nome}. O PDF vai em anexo.`
     : "";
+  const podeConferir = podeMarcarConferencia(await perfilAtual());
+  const conferencia = relatorio?.conferencia;
   const nomeArquivo = relatorio ? `Relatorio_${relatorio.locador.nome.replace(/[^\p{L}\p{N}]+/gu, "_")}_${competencia}` : "Relatorio";
 
   return (
@@ -38,6 +43,24 @@ export default async function PaginaRelatorio({ searchParams }: { searchParams: 
               <button type="submit" className="min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3 text-[14px] font-medium">Ver mês</button>
             </div>
           </form>
+          {relatorio && escolhido ? (
+            <form action={alterarConferenciaAction} className="no-print flex items-center gap-2 text-[14px]">
+              <span className="font-semibold text-navy">
+                {conferencia?.conferido
+                  ? `Conferido${conferencia.conferidoPor ? ` por ${conferencia.conferidoPor}` : ""}${conferencia.conferidoEm ? ` em ${dataHoraTexto(conferencia.conferidoEm)}` : ""}`
+                  : "Não conferido"}
+              </span>
+              {podeConferir ? (
+                <>
+                  <input type="hidden" name="ownerId" value={escolhido} />
+                  <input type="hidden" name="competencia" value={competencia} />
+                  <button name="conferido" value={conferencia?.conferido ? "nao" : "sim"} className="min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3 font-semibold text-navy">
+                    {conferencia?.conferido ? "Desmarcar conferido" : "Marcar como conferido"}
+                  </button>
+                </>
+              ) : null}
+            </form>
+          ) : null}
           {relatorio ? (
             <>
               <BotaoImprimir nomeArquivo={nomeArquivo} />

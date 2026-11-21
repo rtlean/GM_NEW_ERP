@@ -28,6 +28,8 @@ export type EntradaLocador = {
   documento: string;
   email: string;
   cidade: string;
+  /** Sigla do estado, ex.: ES. Opcional. */
+  uf: string;
   whatsapp: string;
   taxa: string;
   formaRepasse: string;
@@ -48,6 +50,7 @@ export type DadosLocador = {
   document: string;
   email: string | null;
   city: string | null;
+  state: string | null;
   phone: string | null;
   admin_fee_percent_basis_points: number;
   preferred_repass_method: string | null;
@@ -112,6 +115,7 @@ export function paraFormulario(dados: Partial<DadosLocador> & { full_name?: stri
     documento: dados.document ?? "",
     email: dados.email ?? "",
     cidade: dados.city ?? "",
+    uf: dados.state ?? "",
     whatsapp,
     taxa: String(taxa / 100).replace(".", ","),
     formaRepasse: dados.preferred_repass_method ?? "PIX",
@@ -136,6 +140,9 @@ export function validarLocador(entrada: EntradaLocador): ResultadoLocador {
   const doc = validarDocumento(entrada.documento);
   if (doc.ok) documento = doc.valor;
   else erros.documento = doc.erro;
+
+  const uf = entrada.uf.trim().toUpperCase();
+  if (uf && !/^[A-Z]{2}$/.test(uf)) erros.uf = "Use a sigla com 2 letras, ex.: ES.";
 
   const email = entrada.email.trim();
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) erros.email = "Informe um e-mail válido.";
@@ -179,6 +186,7 @@ export function validarLocador(entrada: EntradaLocador): ResultadoLocador {
       document: documento,
       email: email || null,
       city: entrada.cidade.trim() || null,
+      state: uf || null,
       phone: telefone.valor,
       admin_fee_percent_basis_points: taxa.valor,
       preferred_repass_method: entrada.formaRepasse,

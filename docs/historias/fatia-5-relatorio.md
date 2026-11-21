@@ -66,3 +66,19 @@ Regras puras em `src/lib/dashboard-regras.ts` (testadas). Leitura em cada módul
 - Desempenho: receita prevista e recebida dos seis meses até a competência (mês sem cobrança aparece como "sem dados"); ocupação dos imóveis do locador; variação do recebido em relação ao mês anterior; locatários ativos; índice de recebimento.
 - Fora desta versão, por falta de regra definida: "Crescimento da receita", "Saúde da carteira" (pontuação) e "Por que esta classificação?".
 - Impressão: `@page` A4 paisagem sem margem (a margem é o próprio espaçamento das páginas).
+
+## Implementação — US-5.3 Conferido e UF do locador (feat/us-5.3-conferido)
+- Botão "Marcar como conferido" / "Desmarcar conferido" na tela do relatório. Só administrador vê e usa o botão; o servidor confere o perfil antes de gravar.
+- Quem marcou e quando aparece na tela e, no PDF, em uma linha "CONFERIDO por … em …" no cabeçalho.
+- Cada alteração vai para a auditoria.
+- Cadastro do locador: campo UF ao lado da cidade (2 letras, opcional). O cabeçalho mostra "Cidade / UF" puxado do cadastro; sem cidade, o campo fica vazio.
+- Nome do arquivo ao baixar o PDF: já estava pronto (Relatorio_<locador>_<aaaa-mm>).
+- Migração aditiva `20261121120000_relatorio_conferencia_e_uf_locador.sql`, testada num banco temporário e aplicada em produção com aprovação do dono (21/11/2026).
+
+Roteiro de teste (como admin):
+1. Abra Relatório mensal, competência 11/2026, locador Locatelli.
+2. Clique em "Marcar como conferido": o texto muda para "Conferido por <seu nome> em <data e hora>".
+3. Clique em "Desmarcar conferido": volta para "Não conferido".
+4. Entre com um usuário operacional (perfil user): o botão não aparece.
+5. Com o relatório conferido, baixe o PDF: a linha CONFERIDO aparece no cabeçalho.
+
