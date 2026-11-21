@@ -32,7 +32,7 @@ export async function buscarLocadorParaEdicao(id: number): Promise<LocadorParaEd
   const { data, error } = await obterClienteServidor()
     .from("owners")
     .select(
-      "id, full_name, document, email, city, phone, admin_fee_percent_basis_points, preferred_repass_method, pix_type, pix_key, bank_name, bank_code, bank_agency, bank_account, bank_account_digit, account_type",
+      "id, full_name, document, email, city, state, phone, admin_fee_percent_basis_points, preferred_repass_method, pix_type, pix_key, bank_name, bank_code, bank_agency, bank_account, bank_account_digit, account_type",
     )
     .eq("company_id", EMPRESA_ID)
     .eq("id", id)
@@ -45,6 +45,7 @@ export async function buscarLocadorParaEdicao(id: number): Promise<LocadorParaEd
     document: data.document ?? "",
     email: data.email,
     city: data.city,
+    state: data.state,
     phone: data.phone,
     admin_fee_percent_basis_points: data.admin_fee_percent_basis_points,
     preferred_repass_method: data.preferred_repass_method,

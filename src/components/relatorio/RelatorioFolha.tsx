@@ -1,5 +1,5 @@
 import { formatarReais } from "@/lib/dinheiro";
-import { rotuloStatus, type LinhaLocatario, type LinhaRateio } from "@/lib/relatorio-regras";
+import { cidadeComUf, dataHoraTexto, rotuloStatus, type LinhaLocatario, type LinhaRateio } from "@/lib/relatorio-regras";
 import type { DesempenhoLocador, RelatorioLocador } from "@/lib/relatorio";
 
 // Folha do relatório, layout do design RelatorioPDF.dc.html: cinco páginas A4 paisagem (1123 x 794 px).
@@ -144,9 +144,15 @@ function Cabecalho({ r, comFaixa = false, mesExtenso: mes = "" }: { r: Relatorio
         <div className="divisor-dourado" />
         <div className="bloco-id">
           <span className="rotulo-id">CIDADE:</span>
-          <strong className="nome-id">{r.locador.cidade ?? ""}</strong>
+          <strong className="nome-id">{cidadeComUf(r.locador.cidade, r.locador.uf)}</strong>
         </div>
       </div>
+      {r.conferencia.conferido ? (
+        <div className="conferido">
+          CONFERIDO{r.conferencia.conferidoPor ? ` por ${r.conferencia.conferidoPor}` : ""}
+          {r.conferencia.conferidoEm ? ` em ${dataHoraTexto(r.conferencia.conferidoEm)}` : ""}
+        </div>
+      ) : null}
     </header>
   );
 }
@@ -266,6 +272,7 @@ const ESTILO_FOLHA = `
 .divisor-dourado { width: 1px; background: #C9A227; }
 .rotulo-id { display: block; color: #4F5B72; font-size: 9px; }
 .nome-id { font-size: 11px; }
+.conferido { font-size: 9px; font-weight: 700; color: #17694A; }
 .titulo-pagina { margin: 0; font: 700 14px Arial, Helvetica, sans-serif; color: #002356; }
 .faixa-cinza { margin: 0; padding: 4px; background: #DCE6F1; color: #1A365D; font: 700 11px Arial, Helvetica, sans-serif; text-align: center; }
 .faixa-cinza.verde { background: #92D050; }

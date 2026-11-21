@@ -14,7 +14,7 @@ O sistema antigo **continua em uso** sobre essas tabelas. Consequências:
 | Módulo | Tabela | Colunas principais | Linhas (18/11) |
 |---|---|---|---|
 | auth/usuarios | `users` + `company_users` | name, email, password_hash, role (`user`/`admin`), status (`active`/`inactive`), must_change_password | 5 / 3 |
-| locadores | `owners` | full_name, document, email, city, phone, admin_fee_percent_basis_points, dados bancários e Pix | 22 |
+| locadores | `owners` | full_name, document, email, city, state (UF, US-5.3), phone, admin_fee_percent_basis_points, dados bancários e Pix | 22 |
 | locatarios | `tenants` | full_name, cpf, document (CPF/CNPJ limpo, único por empresa), email, phone, owner_id (legado; o vínculo real está em tenant_owners), rent_cents e property_type (não editados pela tela) | 88 |
 | vínculo locatário–locador | `tenant_owners` | tenant_id, owner_id, company_id (único por trio); um locatário pode ter vários locadores. A tela de locatários não grava mais este vínculo (ele nasce no contrato, US-3.5) | 88 |
 | imoveis | `properties` | code, type, address, city, state, zip_code, rent_cents, occupancy_status, owner_id | 90 |
@@ -82,4 +82,10 @@ Arquivo: `supabase/migrations/20261120090000_properties_detalhes_design_imoveis.
 - Usa `contract_rent_changes` como está. Aluguel do mês = última alteração com `effective_date` até o dia 1 do mês; sem alteração, `contracts.rent_cents`.
 - Auditoria: `entity = contract`, `action = contract.rent_changed`, `metadata` JSON texto (`competencia`, `anteriorCentavos`, `novoCentavos`, `observacao`).
 - Lista de contratos, Dashboard e locatários leem o aluguel do mês atual em lote (`aluguelNoMesPorContrato`).
+
+## Migração 2026-11-21 (US-5.3, relatorio_conferencia_e_uf_locador) — aditiva
+- `owners.state` (varchar 2, vazio nos cadastros atuais): UF do locador, mostrada no cabeçalho do relatório como "Cidade / UF".
+- Tabela nova `relatorio_conferencias`: company_id, owner_id (locador), competence (AAAA-MM, único por empresa + locador + competência), conferido (boolean), conferido_por (usuário), conferido_em. RLS ligado; o servidor acessa com a chave de serviço.
+- Desmarcar a conferência muda `conferido` para falso; a linha não é apagada. Cada alteração grava um evento em `audit_events` (relatorio.conferido / relatorio.desconferido).
+- Para desfazer (só se nenhum dado novo tiver sido gravado): `drop table public.relatorio_conferencias;` e `alter table public.owners drop column state;`.
 

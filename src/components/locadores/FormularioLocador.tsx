@@ -53,6 +53,9 @@ export function FormularioLocador({ inicial, id, titulo }: Props) {
         <Campo rotulo="Cidade">
           <input name="cidade" defaultValue={inicial.cidade} className={entrada} />
         </Campo>
+        <Campo rotulo="UF" erro={erros.uf}>
+          <input name="uf" defaultValue={inicial.uf} maxLength={2} autoComplete="off" placeholder="ES" className={entrada} />
+        </Campo>
         <Campo rotulo="Taxa de administração (%) *" erro={erros.taxa}>
           <input name="taxa" defaultValue={inicial.taxa} inputMode="decimal" className={entrada} />
         </Campo>

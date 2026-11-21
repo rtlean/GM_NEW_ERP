@@ -6,6 +6,7 @@ import { imoveisPorIds, listarImoveisDoLocador } from "./imoveis";
 import { listarContratosAtivosNaCompetencia } from "./contratos";
 import { listarLancamentos } from "./lancamentos";
 import { listarRepasses } from "./repasses";
+import { buscarConferencia, type ConferenciaRelatorio } from "./relatorio-conferencia";
 import { TAXA_PADRAO_BPS } from "./repasses-regras";
 import {
   classificarCategoria,
@@ -42,7 +43,7 @@ export type DesempenhoLocador = {
 };
 
 export type RelatorioLocador = {
-  locador: { nome: string; cidade: string | null; documento: string | null; banco: string | null; agencia: string | null; conta: string | null; pix: string | null };
+  locador: { nome: string; cidade: string | null; uf: string | null; documento: string | null; banco: string | null; agencia: string | null; conta: string | null; pix: string | null };
   competencia: string;
   linhas: LinhaLocatario[];
   rateio: LinhaRateio[];
@@ -53,6 +54,8 @@ export type RelatorioLocador = {
   /** Data em que o repasse foi liberado, se já foi. */
   repasseLiberadoEm: string | null;
   desempenho: DesempenhoLocador;
+  /** Conferência da competência (US-5.3). Sem registro: não conferido. */
+  conferencia: ConferenciaRelatorio;
 };
 
 /** Locadores com movimento na competência (mesma lista da tela de Repasses). */
@@ -174,6 +177,7 @@ export async function montarRelatorio(ownerId: number, competencia: string): Pro
     locador: {
       nome: locador.full_name,
       cidade: locador.city,
+      uf: locador.state,
       documento: locador.document || null,
       banco: locador.bank_name,
       agencia: locador.bank_agency,
@@ -189,5 +193,6 @@ export async function montarRelatorio(ownerId: number, competencia: string): Pro
     taxaBps,
     repasseLiberadoEm: repasses.find((r) => r.ownerId === ownerId)?.liberadoEm ?? null,
     desempenho,
+    conferencia: await buscarConferencia(ownerId, competencia),
   };
 }
