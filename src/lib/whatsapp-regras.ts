@@ -1,56 +1,7 @@
-// Integração WhatsApp (layout do design WhatsApp.dc.html). Nesta fatia nada é salvo nem enviado:
-// a validação roda no formulário e o token não sai do navegador. Guardar tokens depende de decisão do dono.
+// Integração WhatsApp (layout do design WhatsApp.dc.html). Só a API oficial da Meta.
+// Token e ID do número ficam em variáveis do servidor, nunca no banco nem na tela.
 
-export type ProvedorWhatsApp = "meta" | "evolution";
-
-export const PROVEDORES: { id: ProvedorWhatsApp; nome: string; descricao: string; aviso: string; recomendado: boolean }[] = [
-  {
-    id: "meta",
-    nome: "API oficial do WhatsApp (Meta)",
-    descricao: "Pela Meta ou por um provedor oficial. Exige verificação da empresa e modelos aprovados.",
-    aviso: "Recomendado: menor risco de bloqueio",
-    recomendado: true,
-  },
-  {
-    id: "evolution",
-    nome: "Evolution API (não oficial)",
-    descricao: "Usa o WhatsApp do aparelho por um servidor próprio. Sem custo por mensagem.",
-    aviso: "Risco: pode violar os termos e ter o número bloqueado",
-    recomendado: false,
-  },
-];
-
-export type EntradaConexao = {
-  provedor: ProvedorWhatsApp;
-  numero: string;
-  nomeExibido: string;
-  idNumero: string;
-  token: string;
-  url: string;
-};
-
-export type CampoConexao = "numero" | "idNumero" | "token" | "url";
-
-export type ResultadoConexao = { ok: true } | { ok: false; erros: Partial<Record<CampoConexao, string>> };
-
-/** Valida o formulário de conexão. Não guarda nem envia nada. */
-export function validarConexao(entrada: EntradaConexao): ResultadoConexao {
-  const erros: Partial<Record<CampoConexao, string>> = {};
-  const digitos = entrada.numero.replace(/\D/g, "");
-  if (digitos.length < 10 || digitos.length > 13) erros.numero = "Informe o número com DDD.";
-
-  if (entrada.provedor === "meta") {
-    if (!entrada.token.trim()) erros.token = "Informe o token de acesso.";
-    if (!entrada.idNumero.trim()) erros.idNumero = "Informe o ID do número na Meta.";
-  } else {
-    if (!entrada.token.trim()) erros.token = "Informe a chave da API.";
-    if (!/^https:\/\/\S+$/.test(entrada.url.trim())) erros.url = "A URL do servidor precisa começar com https://";
-  }
-
-  return Object.keys(erros).length === 0 ? { ok: true } : { ok: false, erros };
-}
-
-/** Modelos de mensagem do design (somente leitura). Os modelos são aprovados pela Meta antes do uso. */
+/** Modelos de mensagem do design. Na API oficial, envio fora de conversa aberta exige modelo aprovado pela Meta. */
 export const MODELOS_MENSAGEM: { nome: string; texto: string; categoria: string; status: "Aprovado" | "Em análise" | "Rascunho" }[] = [
   { nome: "Boleto do aluguel", texto: "Olá, {{1}}! O boleto do aluguel de {{2}}, no valor de {{3}}, vence em {{4}}. Linha digitável: {{5}}", categoria: "Utilidade", status: "Aprovado" },
   { nome: "Lembrete de vencimento", texto: "Olá, {{1}}! Lembramos que o aluguel de {{2}} vence amanhã, {{3}}. Se já pagou, desconsidere.", categoria: "Utilidade", status: "Aprovado" },

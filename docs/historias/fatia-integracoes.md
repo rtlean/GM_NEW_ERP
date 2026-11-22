@@ -1,28 +1,26 @@
-# Fatia: Integração WhatsApp (layout do design)
+# Integração WhatsApp (API oficial da Meta)
 
-**Status:** primeira fatia (22/11/2026). Tela pronta; sem envio e sem armazenamento de credenciais.
+**Status:** tela e conexão de teste prontas (22/11/2026). Envio automático ainda não ligado.
 
 ## História
-Como dono da imobiliária, quero ver e preencher a configuração do WhatsApp no mesmo layout do design, para decidir como conectar o número antes de qualquer envio automático.
-
-## Critérios de aceite (desta fatia)
-- Tela `Integração WhatsApp` com cabeçalho, status "Não conectado" e as abas Conexão, Modelos de mensagem e Automações, como no design `WhatsApp.dc.html`.
-- Dois cartões de provedor. A API oficial da Meta vem marcada como recomendada. A Evolution API aparece com o aviso de risco.
-- Formulário conforme o provedor: Meta pede ID do número e token; Evolution pede URL https e chave da API.
-- Validação: número com DDD (10 a 13 dígitos); campos obrigatórios por provedor. O primeiro erro aparece na tela.
-- Token não permanece no estado após enviar.
-- Modelos de mensagem em somente leitura, com status (Aprovado, Em análise, Rascunho).
-- Automações com caixas de marcar; não são salvas nesta versão.
-- Acesso pela permissão `whatsapp` (grupo Integrações).
+Como dono da imobiliária, quero conectar o WhatsApp oficial da Meta, conferir a conexão e enviar boletos, lembretes e avisos por modelos aprovados, sem expor credenciais na tela.
 
 ## Decisões
-- O Sicredi sai do módulo Integrações e vai para Conta digital (pedido do dono, 22/11/2026).
-- Integrações passa a ter só WhatsApp.
-- Nesta fatia nada é enviado nem guardado, e nenhum token é armazenado.
+- Só a API oficial da Meta. A Evolution API (não oficial) foi removida por risco de bloqueio do número.
+- Token e ID do número ficam em variáveis do servidor: `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` e, opcionalmente, `WHATSAPP_API_VERSION`. Não vão para o banco nem para a tela.
+- A tela mostra só se cada variável está configurada, nunca o valor.
+- Sicredi fica no módulo Conta digital, não em Integrações.
 
-## Fora desta fatia (depende de decisão)
-- Onde e como guardar tokens (criptografia, cofre ou variável de ambiente no servidor).
-- Ligação real com a Meta e envio das mensagens.
-- Incluir ou remover a Evolution API (não oficial, com risco de bloqueio).
-- Salvar modelos e automações no banco.
-- Autorização do cliente para receber mensagens (data e forma de consentimento no cadastro).
+## Critérios de aceite (esta fatia)
+- Tela `Integração WhatsApp` com abas Conexão, Modelos de mensagem e Automações, como no design `WhatsApp.dc.html`.
+- Aba Conexão: mostra o estado das variáveis e o botão **Testar conexão**. O teste lê o nome e o número verificado da Meta; não envia mensagem.
+- Modelos de mensagem em somente leitura, com status.
+- Automações com caixas de marcar. Ainda não são salvas nem disparam envios.
+- Acesso pela permissão `whatsapp`.
+
+## Pendências
+- Versão da API: `v21.0` é o padrão. Conferir a versão atual na documentação da Meta antes de produção.
+- Conta da Meta verificada, token permanente e modelos aprovados: dependem do dono.
+- Disparo dos envios automáticos (boleto, lembrete, atraso, nota, relatório, repasse) a partir dos módulos de origem.
+- Salvar as escolhas de automação no banco (migração aditiva, com aprovação).
+- Registro de autorização do cliente para receber mensagens (data e forma no cadastro).
