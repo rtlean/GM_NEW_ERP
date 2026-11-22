@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ehEtapa, etapaVizinha, filtrarPorBusca, resumoPipeline, telefoneParaE164, validarNovoLead, valorParaCentavos } from "./pipeline-regras";
+import { ehEtapa, etapaVizinha, filtrarPorBusca, resumoPipeline, telefoneParaE164, validarEdicaoNegocio, validarNovoLead, valorParaCentavos } from "./pipeline-regras";
 
 describe("valorParaCentavos", () => {
   it("converte texto em centavos sem ponto flutuante", () => {
@@ -119,5 +119,42 @@ describe("filtrarPorBusca", () => {
 
   it("busca vazia devolve tudo", () => {
     expect(filtrarPorBusca(negocios, "   ")).toHaveLength(2);
+  });
+});
+
+describe("validarEdicaoNegocio", () => {
+  const base = { nome: "Ana Souza", tipo: "Locação", valor: "1500", imovel: "", telefone: "(16) 99999-0000", email: "", origem: "", cidade: "", proximoPasso: "", urgente: false };
+
+  it("aceita os dados e converte o valor e o telefone", () => {
+    const r = validarEdicaoNegocio(base);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.edicao.valorCentavos).toBe(150000);
+      expect(r.edicao.telefone).toBe("5516999990000");
+      expect(r.edicao.proximoPasso).toBeNull();
+      expect(r.edicao.urgente).toBe(false);
+    }
+  });
+
+  it("guarda próximo passo e urgência quando informados", () => {
+    const r = validarEdicaoNegocio({ ...base, proximoPasso: "  Ligar amanhã  ", urgente: true });
+    expect(r.ok && r.edicao.proximoPasso).toBe("Ligar amanhã");
+    expect(r.ok && r.edicao.urgente).toBe(true);
+  });
+
+  it("exige telefone, como no cadastro", () => {
+    const r = validarEdicaoNegocio({ ...base, telefone: "" });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.telefone).toBeTruthy();
+  });
+
+  it("limita o próximo passo a 160 caracteres", () => {
+    const r = validarEdicaoNegocio({ ...base, proximoPasso: "x".repeat(161) });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.proximoPasso).toBeTruthy();
+  });
+
+  it("aceita próximo passo com exatamente 160 caracteres", () => {
+    expect(validarEdicaoNegocio({ ...base, proximoPasso: "x".repeat(160) }).ok).toBe(true);
   });
 });

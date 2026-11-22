@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { exigirAcesso, idUsuarioAtual } from "@/lib/acesso";
-import { criarNegocio, moverNegocio } from "@/lib/pipeline";
-import { ehEtapa, validarNovoLead, type CampoLead, type EntradaNovoLead } from "@/lib/pipeline-regras";
+import { atualizarNegocio, criarNegocio, moverNegocio } from "@/lib/pipeline";
+import { ehEtapa, validarEdicaoNegocio, validarNovoLead, type CampoLead, type EntradaNovoLead } from "@/lib/pipeline-regras";
 
 export type EstadoNovoLead =
   | { ok: true; nome: string }
@@ -37,6 +37,41 @@ export async function criarLeadAction(_anterior: EstadoNovoLead, formData: FormD
   }
   revalidatePath("/pipeline");
   return { ok: true, nome: checagem.lead.nome };
+}
+
+export type EstadoEdicao = { ok: true } | { ok: false; erroGeral?: string; erros?: Partial<Record<CampoLead, string>> } | undefined;
+
+/** Edita os dados de um negócio já cadastrado (não muda a etapa). Valida de novo no servidor. */
+export async function editarNegocioAction(_anterior: EstadoEdicao, formData: FormData): Promise<EstadoEdicao> {
+  await exigirAcesso("pipeline");
+
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id) || id <= 0) return { ok: false, erroGeral: "Negócio inválido." };
+
+  const checagem = validarEdicaoNegocio({
+    nome: String(formData.get("nome") ?? ""),
+    tipo: String(formData.get("tipo") ?? ""),
+    valor: String(formData.get("valor") ?? ""),
+    imovel: String(formData.get("imovel") ?? ""),
+    telefone: String(formData.get("telefone") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    origem: String(formData.get("origem") ?? ""),
+    cidade: String(formData.get("cidade") ?? ""),
+    proximoPasso: String(formData.get("proximoPasso") ?? ""),
+    urgente: formData.get("urgente") === "on",
+  });
+  if (!checagem.ok) return { ok: false, erros: checagem.erros };
+
+  const usuarioId = await idUsuarioAtual();
+  if (!usuarioId) return { ok: false, erroGeral: "Sua sessão expirou. Entre de novo." };
+
+  try {
+    await atualizarNegocio({ id, dados: checagem.edicao, usuarioId });
+  } catch (erro) {
+    return { ok: false, erroGeral: erro instanceof Error ? erro.message : "Não foi possível salvar as alterações." };
+  }
+  revalidatePath("/pipeline");
+  return { ok: true };
 }
 
 /** Muda a etapa de um negócio. Só aceita uma das cinco colunas (quatro de venda e Lead Frio). */

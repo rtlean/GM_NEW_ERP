@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
-import { criarLeadAction, moverNegocioAction, type EstadoNovoLead } from "@/app/pipeline/actions";
+import { criarLeadAction, editarNegocioAction, moverNegocioAction, type EstadoEdicao, type EstadoNovoLead } from "@/app/pipeline/actions";
 import { formatarReais } from "@/lib/dinheiro";
-import { ETAPAS, ETAPA_FRIA, ORIGENS_LEAD, etapaVizinha, filtrarPorBusca, resumoPipeline, type Etapa } from "@/lib/pipeline-regras";
+import { ETAPAS, ETAPA_FRIA, ORIGENS_LEAD, etapaVizinha, filtrarPorBusca, resumoPipeline, type Etapa, type TipoNegocio } from "@/lib/pipeline-regras";
 import type { Negocio } from "@/lib/pipeline";
 
 // Kanban do Pipeline (US-P.1), layout do design Pipeline.dc.html. Sem comissão e sem corretor (decisão do dono, 21/11/2026).
@@ -221,6 +221,7 @@ export function PipelineKanban({ negocios }: { negocios: Negocio[] }) {
           negocio={selecionado}
           aoFechar={() => setSelecionadoId(null)}
           aoMudarEtapa={(etapa) => mover(selecionado.id, etapa)}
+          aoEditado={(nome) => setAviso({ mensagem: `${nome} atualizado` })}
         />
       )}
     </div>
@@ -300,7 +301,18 @@ function Campo({ rotulo, erro, className, children }: { rotulo: string; erro?: s
   );
 }
 
-function DetalhesNegocio({ negocio, aoFechar, aoMudarEtapa }: { negocio: Negocio; aoFechar: () => void; aoMudarEtapa: (etapa: Etapa) => void }) {
+function DetalhesNegocio({
+  negocio,
+  aoFechar,
+  aoMudarEtapa,
+  aoEditado,
+}: {
+  negocio: Negocio;
+  aoFechar: () => void;
+  aoMudarEtapa: (etapa: Etapa) => void;
+  aoEditado: (nome: string) => void;
+}) {
+  const [editando, setEditando] = useState(false);
   return (
     <>
       <button type="button" aria-label="Fechar detalhes" onClick={aoFechar} className="fixed inset-0 z-[45] cursor-default border-0 bg-[rgba(14,27,51,0.35)]" />
@@ -319,35 +331,126 @@ function DetalhesNegocio({ negocio, aoFechar, aoMudarEtapa }: { negocio: Negocio
             </svg>
           </button>
         </div>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-          <dt className="text-muted">Imóvel</dt>
-          <dd>{negocio.imovel ?? "Imóvel a definir"}</dd>
-          <dt className="text-muted">Valor</dt>
-          <dd className="tabular-nums">{negocio.tipo === "Venda" ? formatarReais(negocio.valorCentavos) : `${formatarReais(negocio.valorCentavos)}/mês`}</dd>
-          <dt className="text-muted">Telefone</dt>
-          <dd>{negocio.telefone ?? "—"}</dd>
-          <dt className="text-muted">E-mail</dt>
-          <dd>{negocio.email ?? "—"}</dd>
-          <dt className="text-muted">Origem</dt>
-          <dd>{negocio.origem ?? "—"}</dd>
-          <dt className="text-muted">Cidade</dt>
-          <dd>{negocio.cidade ?? "—"}</dd>
-          <dt className="text-muted">Próximo passo</dt>
-          <dd>{negocio.proximoPasso ?? "—"}</dd>
-        </dl>
-        <label className="flex flex-col gap-1 font-semibold">
-          Etapa
-          <select
-            value={negocio.etapa}
-            onChange={(e) => aoMudarEtapa(e.target.value as Etapa)}
-            className="min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3"
-          >
-            {ETAPAS.map((e) => (
-              <option key={e}>{e}</option>
-            ))}
-          </select>
-        </label>
+
+        {editando ? (
+          <EditarNegocioForm
+            negocio={negocio}
+            aoSalvo={() => {
+              setEditando(false);
+              aoEditado(negocio.nome);
+            }}
+            aoCancelar={() => setEditando(false)}
+          />
+        ) : (
+          <>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+              <dt className="text-muted">Imóvel</dt>
+              <dd>{negocio.imovel ?? "Imóvel a definir"}</dd>
+              <dt className="text-muted">Valor</dt>
+              <dd className="tabular-nums">{negocio.tipo === "Venda" ? formatarReais(negocio.valorCentavos) : `${formatarReais(negocio.valorCentavos)}/mês`}</dd>
+              <dt className="text-muted">Telefone</dt>
+              <dd>{negocio.telefone ?? "—"}</dd>
+              <dt className="text-muted">E-mail</dt>
+              <dd>{negocio.email ?? "—"}</dd>
+              <dt className="text-muted">Origem</dt>
+              <dd>{negocio.origem ?? "—"}</dd>
+              <dt className="text-muted">Cidade</dt>
+              <dd>{negocio.cidade ?? "—"}</dd>
+              <dt className="text-muted">Próximo passo</dt>
+              <dd>{negocio.proximoPasso ?? "—"}</dd>
+            </dl>
+            <label className="flex flex-col gap-1 font-semibold">
+              Etapa
+              <select
+                value={negocio.etapa}
+                onChange={(e) => aoMudarEtapa(e.target.value as Etapa)}
+                className="min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3"
+              >
+                {ETAPAS.map((e) => (
+                  <option key={e}>{e}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={() => setEditando(true)}
+              className="min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-4 font-semibold text-navy"
+            >
+              Editar dados
+            </button>
+          </>
+        )}
       </aside>
     </>
+  );
+}
+
+function EditarNegocioForm({ negocio, aoSalvo, aoCancelar }: { negocio: Negocio; aoSalvo: () => void; aoCancelar: () => void }) {
+  const [estado, acao, enviando] = useActionState<EstadoEdicao, FormData>(editarNegocioAction, undefined);
+  const [tipo, setTipo] = useState<TipoNegocio>(negocio.tipo);
+
+  useEffect(() => {
+    if (estado?.ok) aoSalvo();
+  }, [estado, aoSalvo]);
+
+  const erros = estado && !estado.ok ? estado.erros ?? {} : {};
+  const erroGeral = estado && !estado.ok ? estado.erroGeral : undefined;
+
+  return (
+    <form action={acao} className="flex flex-col gap-3">
+      <input type="hidden" name="id" value={negocio.id} />
+      <Campo rotulo="Cliente" erro={erros.nome}>
+        <input name="nome" defaultValue={negocio.nome} required className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <Campo rotulo="Negócio" erro={erros.tipo}>
+        <select name="tipo" value={tipo} onChange={(e) => setTipo(e.target.value as TipoNegocio)} className="min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3">
+          <option>Locação</option>
+          <option>Venda</option>
+        </select>
+      </Campo>
+      <Campo rotulo={tipo === "Venda" ? "Valor do imóvel (R$)" : "Aluguel (R$)"} erro={erros.valor}>
+        <input name="valor" type="number" min="0.01" step="0.01" defaultValue={(negocio.valorCentavos / 100).toFixed(2)} required className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <Campo rotulo="Imóvel (opcional)" erro={erros.imovel}>
+        <input name="imovel" defaultValue={negocio.imovel ?? ""} className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <Campo rotulo="Telefone / WhatsApp" erro={erros.telefone}>
+        <input name="telefone" type="tel" inputMode="tel" defaultValue={negocio.telefone ?? ""} required className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <Campo rotulo="E-mail (opcional)" erro={erros.email}>
+        <input name="email" type="email" defaultValue={negocio.email ?? ""} className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <Campo rotulo="Origem (opcional)" erro={erros.origem}>
+        <select name="origem" defaultValue={negocio.origem ?? ""} className="min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3">
+          <option value="">Não informado</option>
+          {ORIGENS_LEAD.map((o) => (
+            <option key={o}>{o}</option>
+          ))}
+        </select>
+      </Campo>
+      <Campo rotulo="Cidade (opcional)" erro={erros.cidade}>
+        <input name="cidade" defaultValue={negocio.cidade ?? ""} className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <Campo rotulo="Próximo passo (opcional)" erro={erros.proximoPasso}>
+        <input name="proximoPasso" defaultValue={negocio.proximoPasso ?? ""} className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <label className="flex items-center gap-2 font-semibold">
+        <input name="urgente" type="checkbox" defaultChecked={negocio.urgente} className="h-5 w-5" />
+        Urgente
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" disabled={enviando} className="min-h-11 flex-[1_1_150px] rounded-[10px] bg-navy px-4 font-bold text-white disabled:opacity-50">
+          Salvar alterações
+        </button>
+        <button type="button" onClick={aoCancelar} className="min-h-11 flex-[1_1_120px] rounded-[10px] border border-[#A9B4C6] bg-white px-4 font-medium text-navy">
+          Cancelar
+        </button>
+      </div>
+      {erroGeral && (
+        <p role="alert" className="text-[#A32020]">
+          {erroGeral}
+        </p>
+      )}
+    </form>
   );
 }
