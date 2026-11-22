@@ -61,6 +61,7 @@ export const GRUPOS_DE_TELAS: { chave: string; rotulo: string; telas: { chave: s
     telas: [
       { chave: "conta", rotulo: "Extrato da conta" },
       { chave: "pagamentos", rotulo: "Pagamentos e Pix" },
+      { chave: "sicredi", rotulo: "Sicredi" },
     ],
   },
   {
@@ -90,10 +91,7 @@ export const GRUPOS_DE_TELAS: { chave: string; rotulo: string; telas: { chave: s
   {
     chave: "integracoes",
     rotulo: "Integrações",
-    telas: [
-      { chave: "sicredi", rotulo: "Sicredi" },
-      { chave: "whatsapp", rotulo: "WhatsApp" },
-    ],
+    telas: [{ chave: "whatsapp", rotulo: "WhatsApp" }],
   },
 ];
 

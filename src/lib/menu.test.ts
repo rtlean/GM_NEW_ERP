@@ -26,7 +26,8 @@ describe("menu do design", () => {
     expect(emConstrucao("hoje")).toBe(true);
     expect(emConstrucao("imoveis")).toBe(false);
     expect(emConstrucao("locadores")).toBe(false);
-    expect(emConstrucao("sicredi")).toBe(false);
+    expect(emConstrucao("sicredi")).toBe(true);
+    expect(emConstrucao("whatsapp")).toBe(false);
   });
 
   it("Pipeline é exclusivo do dono: admin abre, operacional com a tela liberada não abre", () => {
