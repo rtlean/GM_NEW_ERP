@@ -53,7 +53,7 @@ export type NovoLead = {
   cidade: string | null;
 };
 
-export type CampoLead = "nome" | "tipo" | "valor" | "imovel" | "telefone" | "email" | "origem" | "cidade";
+export type CampoLead = "nome" | "tipo" | "valor" | "imovel" | "telefone" | "email" | "origem" | "cidade" | "proximoPasso";
 export type ResultadoNovoLead = { ok: true; lead: NovoLead } | { ok: false; erros: Partial<Record<CampoLead, string>> };
 
 /**
@@ -123,6 +123,21 @@ export function validarNovoLead(entrada: EntradaNovoLead): ResultadoNovoLead {
       cidade: cidade || null,
     },
   };
+}
+
+export const LIMITE_PROXIMO_PASSO = 160;
+
+export type EntradaEdicao = EntradaNovoLead & { proximoPasso?: string; urgente?: boolean };
+export type EdicaoNegocio = NovoLead & { proximoPasso: string | null; urgente: boolean };
+
+/** Edição de um negócio: mesmas regras do cadastro, mais próximo passo e urgência. A etapa não muda aqui. */
+export function validarEdicaoNegocio(entrada: EntradaEdicao): { ok: true; edicao: EdicaoNegocio } | { ok: false; erros: Partial<Record<CampoLead, string>> } {
+  const r = validarNovoLead(entrada);
+  const erros: Partial<Record<CampoLead, string>> = r.ok ? {} : { ...r.erros };
+  const proximoPasso = (entrada.proximoPasso ?? "").trim();
+  if (proximoPasso.length > LIMITE_PROXIMO_PASSO) erros.proximoPasso = `Use até ${LIMITE_PROXIMO_PASSO} caracteres.`;
+  if (!r.ok || Object.keys(erros).length > 0) return { ok: false, erros };
+  return { ok: true, edicao: { ...r.lead, proximoPasso: proximoPasso || null, urgente: entrada.urgente === true } };
 }
 
 /** Quantidade de negócios e soma dos valores (em centavos). */

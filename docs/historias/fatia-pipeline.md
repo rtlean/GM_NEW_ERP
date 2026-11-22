@@ -72,3 +72,12 @@ Critérios:
 - Dado telefone "(27) 99999-8888", então é salvo como 5527999998888.
 - Dado e-mail inválido ou origem fora da lista, então não salva.
 - Dado lead sem e-mail, origem ou cidade, então salva normalmente.
+
+## Adendo (22/11/2026): editar um negócio
+
+- Botão "Editar dados" no painel lateral abre o formulário com os dados atuais preenchidos.
+- Campos editáveis: cliente, tipo, valor (aluguel ou valor do imóvel), imóvel, telefone, e-mail, origem, cidade, próximo passo e urgente.
+- A etapa não muda pela edição; continua sendo alterada pelas setas e pelo seletor de etapa.
+- Mesmas regras do cadastro: telefone obrigatório e normalizado; e-mail, origem e cidade opcionais; próximo passo com até 160 caracteres.
+- Nada é apagado. Cada edição grava quem alterou e registra "pipeline.editado" na auditoria.
+- Não exige migração: os campos já existem no banco.

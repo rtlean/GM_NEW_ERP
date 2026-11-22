@@ -1,6 +1,6 @@
 import "server-only";
 import { obterClienteServidor } from "./supabase/server";
-import { ehEtapa, type Etapa, type NovoLead, type TipoNegocio } from "./pipeline-regras";
+import { ehEtapa, type EdicaoNegocio, type Etapa, type NovoLead, type TipoNegocio } from "./pipeline-regras";
 
 // Pipeline (US-P.1). Toda consulta filtra company_id = 1. Nada é apagado: um negócio só muda de etapa.
 
@@ -103,6 +103,41 @@ export async function moverNegocio({ id, para, usuarioId }: { id: number; para: 
   await registrarAuditoria({ acao: "pipeline.movido", entidadeId: id, usuarioId, metadata: { de: atual.etapa, para } });
 }
 
+/** Atualiza os dados do negócio (não muda a etapa). Nada é apagado. */
+export async function atualizarNegocio({ id, dados, usuarioId }: { id: number; dados: EdicaoNegocio; usuarioId: number }): Promise<void> {
+  const cliente = obterClienteServidor();
+  const { data: atual, error: erroBusca } = await cliente
+    .from("pipeline_negocios")
+    .select("id")
+    .eq("company_id", EMPRESA_ID)
+    .eq("id", id)
+    .maybeSingle();
+  if (erroBusca) throw new Error("Não foi possível carregar o negócio.");
+  if (!atual) throw new Error("Negócio não encontrado.");
+
+  const { error } = await cliente
+    .from("pipeline_negocios")
+    .update({
+      nome: dados.nome,
+      tipo: dados.tipo,
+      imovel: dados.imovel,
+      valor_centavos: dados.valorCentavos,
+      telefone: dados.telefone,
+      email: dados.email,
+      origem: dados.origem,
+      cidade: dados.cidade,
+      proximo_passo: dados.proximoPasso,
+      urgente: dados.urgente,
+      atualizado_em: new Date().toISOString(),
+      atualizado_por: usuarioId,
+    })
+    .eq("company_id", EMPRESA_ID)
+    .eq("id", id);
+  if (error) throw new Error("Não foi possível salvar as alterações. Tente de novo.");
+
+  await registrarAuditoria({ acao: "pipeline.editado", entidadeId: id, usuarioId, metadata: {} });
+}
+
 /** Auditoria: tenta duas vezes. Se falhar nas duas, a alteração fica gravada e a tela avisa. */
 async function registrarAuditoria({
   acao,
@@ -110,7 +145,7 @@ async function registrarAuditoria({
   usuarioId,
   metadata,
 }: {
-  acao: "pipeline.criado" | "pipeline.movido";
+  acao: "pipeline.criado" | "pipeline.movido" | "pipeline.editado";
   entidadeId: number;
   usuarioId: number;
   metadata: Record<string, string>;
