@@ -59,3 +59,16 @@ Roteiro de teste manual (depois de aplicar em homologação):
 2. Criar um lead de locação com valor 2500 e conferir que ele aparece em Prospecção.
 3. Avançar até Fechamento, voltar uma etapa e arrastar outro cartão; usar "Desfazer".
 4. Entrar como secretária e conferir que Pipeline não aparece no menu e /pipeline dá 404.
+
+## Adendo (22/11/2026): contato e origem do lead
+Decisão do dono: o formulário Novo lead passa a ter contato e origem.
+- **Telefone / WhatsApp:** obrigatório. Guardado só com dígitos e DDI 55 (ex.: 5527999998888), como o restante do ERP.
+- **E-mail, origem e cidade:** opcionais. Origem é uma lista: Indicação, Portal, WhatsApp, Site, Redes sociais, Outro.
+- O painel de detalhes mostra telefone, e-mail, origem e cidade.
+- Migração aditiva `20261122160000_pipeline_contato_origem.sql`: cria as quatro colunas, todas opcionais no banco. Telefone é exigido pela tela, não pelo banco.
+
+Critérios:
+- Dado um lead sem telefone, então o formulário não salva e mostra o erro abaixo do campo.
+- Dado telefone "(27) 99999-8888", então é salvo como 5527999998888.
+- Dado e-mail inválido ou origem fora da lista, então não salva.
+- Dado lead sem e-mail, origem ou cidade, então salva normalmente.

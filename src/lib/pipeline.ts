@@ -15,12 +15,16 @@ export type Negocio = {
   etapa: Etapa;
   proximoPasso: string | null;
   urgente: boolean;
+  telefone: string | null;
+  email: string | null;
+  origem: string | null;
+  cidade: string | null;
 };
 
 export async function listarNegocios(): Promise<Negocio[]> {
   const { data, error } = await obterClienteServidor()
     .from("pipeline_negocios")
-    .select("id, nome, tipo, imovel, valor_centavos, etapa, proximo_passo, urgente")
+    .select("id, nome, tipo, imovel, valor_centavos, etapa, proximo_passo, urgente, telefone, email, origem, cidade")
     .eq("company_id", EMPRESA_ID)
     .order("criado_em", { ascending: false });
   if (error) throw new Error("Não foi possível carregar o pipeline.");
@@ -38,6 +42,10 @@ export async function listarNegocios(): Promise<Negocio[]> {
         etapa: linha.etapa,
         proximoPasso: linha.proximo_passo,
         urgente: linha.urgente,
+        telefone: linha.telefone,
+        email: linha.email,
+        origem: linha.origem,
+        cidade: linha.cidade,
       },
     ];
   });
@@ -53,6 +61,10 @@ export async function criarNegocio(lead: NovoLead, usuarioId: number): Promise<n
       nome: lead.nome,
       tipo: lead.tipo,
       imovel: lead.imovel,
+      telefone: lead.telefone,
+      email: lead.email,
+      origem: lead.origem,
+      cidade: lead.cidade,
       valor_centavos: lead.valorCentavos,
       etapa: "Prospecção",
       urgente: true,

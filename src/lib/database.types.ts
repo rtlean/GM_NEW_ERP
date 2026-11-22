@@ -2159,12 +2159,16 @@ export type Database = {
         Row: {
           atualizado_em: string
           atualizado_por: number | null
+          cidade: string | null
           company_id: number
           criado_em: string
           criado_por: number | null
+          email: string | null
           etapa: string
           id: number
           imovel: string | null
+          origem: string | null
+          telefone: string | null
           nome: string
           proximo_passo: string | null
           tipo: string
@@ -2174,13 +2178,17 @@ export type Database = {
         Insert: {
           atualizado_em?: string
           atualizado_por?: number | null
+          cidade?: string | null
           company_id?: number
           criado_em?: string
           criado_por?: number | null
+          email?: string | null
           etapa?: string
           id?: number
           imovel?: string | null
           nome: string
+          origem?: string | null
+          telefone?: string | null
           proximo_passo?: string | null
           tipo: string
           urgente?: boolean
@@ -2189,13 +2197,17 @@ export type Database = {
         Update: {
           atualizado_em?: string
           atualizado_por?: number | null
+          cidade?: string | null
           company_id?: number
           criado_em?: string
           criado_por?: number | null
+          email?: string | null
           etapa?: string
           id?: number
           imovel?: string | null
           nome?: string
+          origem?: string | null
+          telefone?: string | null
           proximo_passo?: string | null
           tipo?: string
           urgente?: boolean
