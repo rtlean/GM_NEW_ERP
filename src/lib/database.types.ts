@@ -2155,6 +2155,69 @@ export type Database = {
         }
         Relationships: []
       }
+      pipeline_negocios: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: number | null
+          company_id: number
+          criado_em: string
+          criado_por: number | null
+          etapa: string
+          id: number
+          imovel: string | null
+          nome: string
+          proximo_passo: string | null
+          tipo: string
+          urgente: boolean
+          valor_centavos: number
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: number | null
+          company_id?: number
+          criado_em?: string
+          criado_por?: number | null
+          etapa?: string
+          id?: number
+          imovel?: string | null
+          nome: string
+          proximo_passo?: string | null
+          tipo: string
+          urgente?: boolean
+          valor_centavos: number
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: number | null
+          company_id?: number
+          criado_em?: string
+          criado_por?: number | null
+          etapa?: string
+          id?: number
+          imovel?: string | null
+          nome?: string
+          proximo_passo?: string | null
+          tipo?: string
+          urgente?: boolean
+          valor_centavos?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_negocios_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pipeline_negocios_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       relatorio_conferencias: {
         Row: {
           company_id: number

@@ -16,6 +16,9 @@ export type PerfilAcesso = {
 /** Tela que só o administrador abre; nunca liberada para o operacional. */
 export const TELA_SO_ADMIN = "usuarios";
 
+/** Telas exclusivas do dono (admin): Usuários e Pipeline (decisão do dono, 21/11/2026). */
+export const TELAS_SO_ADMIN: string[] = [TELA_SO_ADMIN, "pipeline"];
+
 /** Telas que o admin pode liberar para o operacional, nos mesmos grupos do design "Usuários e acessos". */
 export const GRUPOS_DE_TELAS: { chave: string; rotulo: string; telas: { chave: string; rotulo: string }[] }[] = [
   {
@@ -24,7 +27,6 @@ export const GRUPOS_DE_TELAS: { chave: string; rotulo: string; telas: { chave: s
     telas: [
       { chave: "dashboard", rotulo: "Dashboard" },
       { chave: "hoje", rotulo: "Hoje" },
-      { chave: "pipeline", rotulo: "Pipeline" },
       { chave: "imoveis", rotulo: "Imóveis" },
     ],
   },
@@ -100,7 +102,7 @@ export const MODELOS_DE_ACESSO: { chave: string; rotulo: string; telas: string[]
   {
     chave: "secretaria",
     rotulo: "Secretária",
-    telas: ["hoje", "pipeline", "imoveis", "contratos", "locadores", "locatarios", "lancamentos", "faturamento", "reajustes", "cobranca", "leitura"],
+    telas: ["hoje", "imoveis", "contratos", "locadores", "locatarios", "lancamentos", "faturamento", "reajustes", "cobranca", "leitura"],
   },
   { chave: "nenhuma", rotulo: "Nenhuma tela", telas: [] },
 ];
@@ -117,7 +119,7 @@ export function podeEntrar(perfil: Pick<PerfilAcesso, "status">): boolean {
 export function podeAbrirTela(perfil: PerfilAcesso | null, tela: string): boolean {
   if (!perfil || !podeEntrar(perfil)) return false;
   if (perfil.role === "admin") return true;
-  if (tela === TELA_SO_ADMIN) return false;
+  if (TELAS_SO_ADMIN.includes(tela)) return false;
   return perfil.telas.includes(tela);
 }
 

@@ -24,7 +24,7 @@ Barra superior com grupos (pílulas) e submenu com sublinhado dourado:
 - **Locação:** Contratos, Locadores, Locatários, Lançamentos, Relatório mensal
 - **Usuários** (só admin) · **Sair**
 
-Telas do protótipo fora da v1 (Sicredi, Notas, WhatsApp, Consórcio, Financiamento, Pipeline, Financeiro etc.) não entram no menu.
+Telas do protótipo fora da v1 (Sicredi, Notas, WhatsApp, Consórcio, Financiamento, Financeiro etc.) não entram no menu.
 
 ## Padrões de tela
 | Padrão | Regra |
