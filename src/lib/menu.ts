@@ -28,11 +28,11 @@ export const MENU: GrupoMenu[] = [
     emConstrucao: true,
     itens: [construcao("extrato", "Pagar e receber"), construcao("leitura", "Ler documento"), construcao("conciliacao", "Conciliação"), construcao("relatorios", "Relatórios")],
   },
-  { rotulo: "Conta digital", emConstrucao: true, itens: [construcao("conta", "Extrato da conta"), construcao("pagamentos", "Pagamentos e Pix")] },
+  { rotulo: "Conta digital", emConstrucao: true, itens: [construcao("conta", "Extrato da conta"), construcao("pagamentos", "Pagamentos e Pix"), construcao("sicredi", "Sicredi")] },
   { rotulo: "Fiscal", emConstrucao: true, itens: [construcao("notas", "Notas fiscais"), construcao("dimob", "DIMOB e IR")] },
   { rotulo: "Proteção", emConstrucao: true, itens: [construcao("seguros", "Seguros"), construcao("garantias", "Garantias")] },
   { rotulo: "Crédito", emConstrucao: true, itens: [construcao("consorcio", "Consórcio"), construcao("financiamento", "Financiamento")] },
-  { rotulo: "Integrações", itens: [{ rota: "sicredi", rotulo: "Sicredi" }, { rota: "whatsapp", rotulo: "WhatsApp" }] },
+  { rotulo: "Integrações", itens: [{ rota: "whatsapp", rotulo: "WhatsApp" }] },
   { rotulo: "Usuários", itens: [{ rota: "usuarios", rotulo: "Usuários e acessos" }] },
 ];
 

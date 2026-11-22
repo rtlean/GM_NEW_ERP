@@ -69,7 +69,7 @@ Metas de redução são propostas, não dados medidos: validar a linha de base n
 - Equipe de construção: 1 pessoa não técnica usando Claude Code (vibe coding).
 - Stack definida: Next.js + TypeScript + Tailwind, Supabase (banco existente e login), GitHub (rtlean/GM_NEW_ERP), VPS da Integrator com domínio.
 - Orçamento enxuto: preferir planos gratuitos/básicos.
-- Integrações externas na v1: Sicredi e WhatsApp. NFS-e fica para versão futura.
+- Integrações externas na v1: WhatsApp (módulo Integrações). O Sicredi fica no módulo Conta digital. NFS-e fica para versão futura.
 - NFS-e nacional obrigatória para ME do Simples (confirmar regras vigentes com o contador).
 - Regra de aluguel: mês inteiro, sem proporcional nem retroativo.
 
