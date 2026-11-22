@@ -27,6 +27,7 @@ Trabalhe na branch feat/us-3.2. Ao final: testes passando, roteiro de teste manu
 | 5 Relatório e Dashboard | [fatia-5-relatorio.md](fatia-5-relatorio.md) | US-5.1 a US-5.4 |
 | 6 Publicação e virada | [fatia-6-migracao.md](fatia-6-migracao.md) | US-6.1 a US-6.4 |
 | Pipeline (incluído na v1, 21/11/2026) | [fatia-pipeline.md](fatia-pipeline.md) | US-P.1 |
+| Integração WhatsApp (tela do design, 22/11/2026) | [fatia-integracoes.md](fatia-integracoes.md) | Integrações |
 
 ## Personas
 - **Dono** (admin): gerusio.magno1988@gmail.com
