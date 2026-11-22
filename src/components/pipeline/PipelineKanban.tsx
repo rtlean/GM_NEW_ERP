@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { criarLeadAction, moverNegocioAction, type EstadoNovoLead } from "@/app/pipeline/actions";
 import { formatarReais } from "@/lib/dinheiro";
-import { ETAPAS, ETAPA_FRIA, etapaVizinha, filtrarPorBusca, resumoPipeline, type Etapa } from "@/lib/pipeline-regras";
+import { ETAPAS, ETAPA_FRIA, ORIGENS_LEAD, etapaVizinha, filtrarPorBusca, resumoPipeline, type Etapa } from "@/lib/pipeline-regras";
 import type { Negocio } from "@/lib/pipeline";
 
 // Kanban do Pipeline (US-P.1), layout do design Pipeline.dc.html. Sem comissão e sem corretor (decisão do dono, 21/11/2026).
@@ -258,6 +258,23 @@ function NovoLeadForm({ aoSalvar, aoCancelar }: { aoSalvar: (nome: string) => vo
       <Campo rotulo="Imóvel (opcional)" erro={erros.imovel} className="flex-[2_1_200px]">
         <input name="imovel" className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
       </Campo>
+      <Campo rotulo="Telefone / WhatsApp" erro={erros.telefone} className="flex-[1_1_180px]">
+        <input name="telefone" type="tel" inputMode="tel" placeholder="(27) 99999-8888" required className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <Campo rotulo="E-mail (opcional)" erro={erros.email} className="flex-[1_1_200px]">
+        <input name="email" type="email" className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
+      <Campo rotulo="Origem (opcional)" erro={erros.origem} className="flex-[1_1_150px]">
+        <select name="origem" defaultValue="" className="min-h-11 rounded-[10px] border border-[#A9B4C6] bg-white px-3">
+          <option value="">Não informado</option>
+          {ORIGENS_LEAD.map((o) => (
+            <option key={o}>{o}</option>
+          ))}
+        </select>
+      </Campo>
+      <Campo rotulo="Cidade (opcional)" erro={erros.cidade} className="flex-[1_1_180px]">
+        <input name="cidade" className="min-h-11 rounded-[10px] border border-[#A9B4C6] px-3" />
+      </Campo>
       <button type="submit" disabled={enviando} className="min-h-11 rounded-[10px] bg-navy px-[18px] font-bold text-white disabled:opacity-50">
         Adicionar à Prospecção
       </button>
@@ -307,6 +324,14 @@ function DetalhesNegocio({ negocio, aoFechar, aoMudarEtapa }: { negocio: Negocio
           <dd>{negocio.imovel ?? "Imóvel a definir"}</dd>
           <dt className="text-muted">Valor</dt>
           <dd className="tabular-nums">{negocio.tipo === "Venda" ? formatarReais(negocio.valorCentavos) : `${formatarReais(negocio.valorCentavos)}/mês`}</dd>
+          <dt className="text-muted">Telefone</dt>
+          <dd>{negocio.telefone ?? "—"}</dd>
+          <dt className="text-muted">E-mail</dt>
+          <dd>{negocio.email ?? "—"}</dd>
+          <dt className="text-muted">Origem</dt>
+          <dd>{negocio.origem ?? "—"}</dd>
+          <dt className="text-muted">Cidade</dt>
+          <dd>{negocio.cidade ?? "—"}</dd>
           <dt className="text-muted">Próximo passo</dt>
           <dd>{negocio.proximoPasso ?? "—"}</dd>
         </dl>

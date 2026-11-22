@@ -24,12 +24,21 @@ export function etapaVizinha(etapa: Etapa, direcao: 1 | -1): Etapa | null {
   return posicao < 0 || posicao >= ETAPAS.length ? null : ETAPAS[posicao];
 }
 
+export const ORIGENS_LEAD = ["Indicação", "Portal", "WhatsApp", "Site", "Redes sociais", "Outro"] as const;
+export type OrigemLead = (typeof ORIGENS_LEAD)[number];
+export const LIMITE_EMAIL = 160;
+export const LIMITE_CIDADE = 80;
+
 export type EntradaNovoLead = {
   nome: string;
   tipo: string;
   /** Texto do campo de valor (aluguel ou valor do imóvel), como o usuário digitou. */
   valor: string;
   imovel?: string;
+  telefone: string;
+  email?: string;
+  origem?: string;
+  cidade?: string;
 };
 
 export type NovoLead = {
@@ -37,9 +46,27 @@ export type NovoLead = {
   tipo: TipoNegocio;
   valorCentavos: number;
   imovel: string | null;
+  /** Só dígitos, com DDI 55 (ex.: 5527999998888), como o projeto guarda telefones. */
+  telefone: string;
+  email: string | null;
+  origem: OrigemLead | null;
+  cidade: string | null;
 };
 
-export type ResultadoNovoLead = { ok: true; lead: NovoLead } | { ok: false; erros: Partial<Record<"nome" | "tipo" | "valor" | "imovel", string>> };
+export type CampoLead = "nome" | "tipo" | "valor" | "imovel" | "telefone" | "email" | "origem" | "cidade";
+export type ResultadoNovoLead = { ok: true; lead: NovoLead } | { ok: false; erros: Partial<Record<CampoLead, string>> };
+
+/**
+ * Converte o telefone digitado em formato WhatsApp: só dígitos, com DDI 55.
+ * Aceita "27999998888", "(27) 99999-8888" ou "+55 27 99999-8888". Null se não couber no formato.
+ */
+export function telefoneParaE164(texto: string): string | null {
+  const digitos = texto.replace(/\D/g, "");
+  const comDdi = digitos.length === 10 || digitos.length === 11 ? `55${digitos}` : digitos;
+  return /^55\d{10,11}$/.test(comDdi) ? comDdi : null;
+}
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Converte "2500", "2500,5" ou "2500.50" em centavos inteiros. Null se não for um valor positivo com até 2 casas.
@@ -55,7 +82,7 @@ export function valorParaCentavos(texto: string): number | null {
 }
 
 export function validarNovoLead(entrada: EntradaNovoLead): ResultadoNovoLead {
-  const erros: Partial<Record<"nome" | "tipo" | "valor" | "imovel", string>> = {};
+  const erros: Partial<Record<CampoLead, string>> = {};
 
   const nome = entrada.nome.trim();
   if (!nome) erros.nome = "Informe o nome do cliente.";
@@ -70,10 +97,31 @@ export function validarNovoLead(entrada: EntradaNovoLead): ResultadoNovoLead {
   const imovel = (entrada.imovel ?? "").trim();
   if (imovel.length > LIMITE_IMOVEL) erros.imovel = `Use até ${LIMITE_IMOVEL} caracteres.`;
 
-  if (Object.keys(erros).length > 0 || valorCentavos === null) return { ok: false, erros };
+  const telefone = telefoneParaE164(entrada.telefone);
+  if (!telefone) erros.telefone = "Informe o telefone com DDD, por exemplo (27) 99999-8888.";
+
+  const email = (entrada.email ?? "").trim();
+  if (email && (email.length > LIMITE_EMAIL || !EMAIL.test(email))) erros.email = "Informe um e-mail válido.";
+
+  const origem = (entrada.origem ?? "").trim();
+  if (origem && !(ORIGENS_LEAD as readonly string[]).includes(origem)) erros.origem = "Escolha uma origem da lista.";
+
+  const cidade = (entrada.cidade ?? "").trim();
+  if (cidade.length > LIMITE_CIDADE) erros.cidade = `Use até ${LIMITE_CIDADE} caracteres.`;
+
+  if (Object.keys(erros).length > 0 || valorCentavos === null || telefone === null) return { ok: false, erros };
   return {
     ok: true,
-    lead: { nome, tipo: tipo as TipoNegocio, valorCentavos, imovel: imovel || null },
+    lead: {
+      nome,
+      tipo: tipo as TipoNegocio,
+      valorCentavos,
+      imovel: imovel || null,
+      telefone,
+      email: email || null,
+      origem: (origem || null) as OrigemLead | null,
+      cidade: cidade || null,
+    },
   };
 }
 

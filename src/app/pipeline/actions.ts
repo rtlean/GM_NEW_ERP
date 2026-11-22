@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { exigirAcesso, idUsuarioAtual } from "@/lib/acesso";
 import { criarNegocio, moverNegocio } from "@/lib/pipeline";
-import { ehEtapa, validarNovoLead, type EntradaNovoLead } from "@/lib/pipeline-regras";
+import { ehEtapa, validarNovoLead, type CampoLead, type EntradaNovoLead } from "@/lib/pipeline-regras";
 
 export type EstadoNovoLead =
   | { ok: true; nome: string }
-  | { ok: false; erroGeral?: string; erros?: Partial<Record<"nome" | "tipo" | "valor" | "imovel", string>> }
+  | { ok: false; erroGeral?: string; erros?: Partial<Record<CampoLead, string>> }
   | undefined;
 
 /** Cria um lead em Prospecção (US-P.1). Valida de novo no servidor, não confia só na tela. */
@@ -19,6 +19,10 @@ export async function criarLeadAction(_anterior: EstadoNovoLead, formData: FormD
     tipo: String(formData.get("tipo") ?? ""),
     valor: String(formData.get("valor") ?? ""),
     imovel: String(formData.get("imovel") ?? ""),
+    telefone: String(formData.get("telefone") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    origem: String(formData.get("origem") ?? ""),
+    cidade: String(formData.get("cidade") ?? ""),
   };
   const checagem = validarNovoLead(entrada);
   if (!checagem.ok) return { ok: false, erros: checagem.erros };
